@@ -6,6 +6,10 @@ junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 appcompat = "1.6.1"
 material = "1.10.0"
+#訂定套件版本號
+room = "2.8.4"
+ksp = "2.2.10-2.0.2"
+recyclerview ="1.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -14,7 +18,13 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+#加入Room相關套件
+androidx-room-runtime = {group = "androidx.room", name = "room-runtime", version.ref = "room"}
+androidx-room-ktx = {group ="androidx.room", name = "room-ktx", version.ref ="room"}
+androidx-room-compiler = {group ="androidx.room", name = "room-compiler", version.ref ="room"}
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-
+#定義Room的KSP外掛
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
