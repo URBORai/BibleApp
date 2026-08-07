@@ -1,22 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 極簡閱讀排版：節與節之間靠留白區隔，不畫分隔線，維持連續閱讀的段落感 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/background_primary"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="14dp"
-    android:paddingBottom="14dp">
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:paddingTop="9dp"
+    android:paddingBottom="9dp">
 
+    <!-- 節號以上標小字的形式接在本文前面（樣式由 VerseAdapter 用 Span 套用），
+         行距放寬到 1.45 倍讓長段落讀起來不擁擠 -->
     <TextView
         android:id="@+id/textCuv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/text_primary"
         android:textSize="18sp"
-        android:lineSpacingExtra="6dp"
-        android:lineSpacingMultiplier="1.15"
+        android:lineSpacingExtra="2dp"
+        android:lineSpacingMultiplier="1.45"
         android:text="CUV 經文內容" />
 
     <LinearLayout
@@ -24,13 +27,13 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="8dp">
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="10dp">
 
         <View
             android:layout_width="3dp"
             android:layout_height="match_parent"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="12dp"
             android:background="@color/divider" />
 
         <TextView
@@ -41,16 +44,10 @@
             android:textColor="@color/text_tertiary"
             android:textSize="14sp"
             android:textStyle="italic"
-            android:lineSpacingExtra="4dp"
-            android:lineSpacingMultiplier="1.1"
+            android:lineSpacingExtra="2dp"
+            android:lineSpacingMultiplier="1.35"
             android:text="NKJV verse text" />
 
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="14dp"
-        android:background="@color/divider" />
 
 </LinearLayout>

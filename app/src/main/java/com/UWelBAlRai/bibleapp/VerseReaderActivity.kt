@@ -9,7 +9,9 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.UWelBAlRai.bibleapp.data.BibleDatabase
+import com.UWelBAlRai.bibleapp.data.BookOrder
 import com.UWelBAlRai.bibleapp.databinding.ActivityVerseReaderBinding
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
 // App 啟動首頁：沒有上次閱讀記錄時預設載入創世記第 1 章
@@ -41,6 +43,12 @@ class VerseReaderActivity : AppCompatActivity() {
     private var currentBookCode: String = DEFAULT_BOOK_CODE
     private var currentChapter: Int = DEFAULT_CHAPTER
 
+    // 全部書卷（依 order_index 排序）快取一份，跨書卷翻頁與書卷選單共用，不用每次重查
+    private var cachedBooks: List<BookOrder> = emptyList()
+
+    // 目前書卷的章節清單，翻頁與「章」選單共用；章號不保證連號，一律用清單位置前後移動
+    private var currentChapters: List<Int> = emptyList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -71,8 +79,16 @@ class VerseReaderActivity : AppCompatActivity() {
         }
         binding.btnOldTestament.setOnClickListener { showBookPicker(isOldTestament = true) }
         binding.btnNewTestament.setOnClickListener { showBookPicker(isOldTestament = false) }
-        binding.btnChapterPicker.setOnClickListener { showChapterPicker() }
+        binding.btnChapterPicker.setOnClickListener {
+            lifecycleScope.launch {
+                val book = books().find { it.bookCode == currentBookCode } ?: return@launch
+                showChapterPicker(book)
+            }
+        }
         binding.btnThemeSettings.setOnClickListener { showThemeDialog() }
+
+        binding.fabPreviousChapter.setOnClickListener { goToAdjacentChapter(-1) }
+        binding.fabNextChapter.setOnClickListener { goToAdjacentChapter(1) }
 
         val intentBook = intent.getStringExtra("book_code")
         val intentChapter = intent.getIntExtra("chapter", -1)
@@ -106,6 +122,7 @@ class VerseReaderActivity : AppCompatActivity() {
 
             currentBookCode = bookCode
             currentChapter = chapter
+            currentChapters = db.bibleDao().getChapterList(bookCode)
 
             prefs.edit()
                 .putString(KEY_LAST_READ_BOOK, bookCode)
@@ -114,6 +131,11 @@ class VerseReaderActivity : AppCompatActivity() {
 
             adapter.updateVerses(verses)
             binding.recyclerVerses.scrollToPosition(0)
+            updateChapterNavButtons()
+
+            // 所有切換途徑（舊約／新約選單、章選單、左右浮動按鈕）都會走到這裡，標題一律同步更新
+            val bookName = books().find { it.bookCode == bookCode }?.cnName ?: bookCode
+            binding.textCurrentLocation.text = "$bookName 第${chapter}章"
 
             // 從搜尋結果進入時，捲動到對應節並短暫高亮
             if (targetVerse != -1) {
@@ -131,9 +153,63 @@ class VerseReaderActivity : AppCompatActivity() {
         }
     }
 
+    // getAllBooks() 已依 order_index 排序，清單位置就是正典順序，跨書卷翻頁直接用位置前後移動
+    private suspend fun books(): List<BookOrder> {
+        if (cachedBooks.isEmpty()) {
+            cachedBooks = db.bibleDao().getAllBooks()
+        }
+        return cachedBooks
+    }
+
+    // 章節翻頁：本卷內還有前／後一章就直接換章，
+    // 已經在本卷首章／末章則跨到相鄰書卷的末章／首章，只有整本聖經的頭尾才無路可走
+    private fun goToAdjacentChapter(step: Int) {
+        lifecycleScope.launch {
+            val chapterIndex = currentChapters.indexOf(currentChapter)
+            val targetIndex = chapterIndex + step
+            if (chapterIndex != -1 && targetIndex in currentChapters.indices) {
+                loadChapter(currentBookCode, currentChapters[targetIndex])
+                return@launch
+            }
+
+            val adjacentBook = adjacentBook(step) ?: return@launch
+            val chapters = db.bibleDao().getChapterList(adjacentBook.bookCode)
+            // 往前翻進入前一卷的最後一章，往後翻進入下一卷的第一章
+            val chapter = (if (step < 0) chapters.lastOrNull() else chapters.firstOrNull()) ?: return@launch
+            loadChapter(adjacentBook.bookCode, chapter)
+        }
+    }
+
+    private suspend fun adjacentBook(step: Int): BookOrder? {
+        val allBooks = books()
+        val bookIndex = allBooks.indexOfFirst { it.bookCode == currentBookCode }
+        if (bookIndex == -1) return null
+        return allBooks.getOrNull(bookIndex + step)
+    }
+
+    // 只有創世記第 1 章的「上一章」與啟示錄最後一章的「下一章」真的沒有去處，其餘一律可按
+    private suspend fun updateChapterNavButtons() {
+        val allBooks = books()
+        val bookIndex = allBooks.indexOfFirst { it.bookCode == currentBookCode }
+        val chapterIndex = currentChapters.indexOf(currentChapter)
+
+        setNavEnabled(binding.fabPreviousChapter, chapterIndex > 0 || bookIndex > 0)
+        setNavEnabled(
+            binding.fabNextChapter,
+            (chapterIndex != -1 && chapterIndex < currentChapters.lastIndex) ||
+                (bookIndex != -1 && bookIndex < allBooks.lastIndex)
+        )
+    }
+
+    // 停用時保留按鈕位置只調暗，避免版面在翻到頭尾時跳動
+    private fun setNavEnabled(fab: FloatingActionButton, enabled: Boolean) {
+        fab.isEnabled = enabled
+        fab.alpha = if (enabled) 1f else 0.3f
+    }
+
     private fun showBookPicker(isOldTestament: Boolean) {
         lifecycleScope.launch {
-            val books = db.bibleDao().getAllBooks()
+            val books = books()
             // book_order 已依 order_index 排序，前 39 筆固定是舊約，其餘是新約
             val filtered = if (isOldTestament) {
                 books.take(OLD_TESTAMENT_BOOK_COUNT)
@@ -146,25 +222,29 @@ class VerseReaderActivity : AppCompatActivity() {
             AlertDialog.Builder(this@VerseReaderActivity)
                 .setTitle(if (isOldTestament) "舊約" else "新約")
                 .setItems(names) { _, which ->
-                    loadChapter(filtered[which].bookCode, 1)
+                    // 選完書卷不直接跳第 1 章，接著讓使用者挑章節
+                    lifecycleScope.launch { showChapterPicker(filtered[which]) }
                 }
                 .show()
         }
     }
 
-    private fun showChapterPicker() {
-        lifecycleScope.launch {
-            val chapters = db.bibleDao().getChapterList(currentBookCode)
-            if (chapters.isEmpty()) return@launch
-
-            val labels = chapters.map { "第 $it 章" }.toTypedArray()
-            AlertDialog.Builder(this@VerseReaderActivity)
-                .setTitle("選擇章節")
-                .setItems(labels) { _, which ->
-                    loadChapter(currentBookCode, chapters[which])
-                }
-                .show()
+    private suspend fun showChapterPicker(book: BookOrder) {
+        // 目前這卷的章節清單 loadChapter 已經取好，直接用快取；換卷才需要重查
+        val chapters = if (book.bookCode == currentBookCode && currentChapters.isNotEmpty()) {
+            currentChapters
+        } else {
+            db.bibleDao().getChapterList(book.bookCode)
         }
+        if (chapters.isEmpty()) return
+
+        val labels = chapters.map { "第 $it 章" }.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle(book.cnName)
+            .setItems(labels) { _, which ->
+                loadChapter(book.bookCode, chapters[which])
+            }
+            .show()
     }
 
     private fun showThemeDialog() {

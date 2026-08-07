@@ -18,6 +18,8 @@
     <color name="text_tertiary">#555555</color>
     <color name="divider">#DDDDDD</color>
     <color name="highlight_verse">#FFF59D</color>
+    <!-- 節號的強調色：跟關鍵字標註的紅／藍／綠區隔開，避免搜尋結果畫面混淆 -->
+    <color name="verse_number">#B45309</color>
 
     <!-- 多關鍵字標註色（紅／藍／綠），淺色背景下的可讀版本 -->
     <color name="keyword1">#D32F2F</color>

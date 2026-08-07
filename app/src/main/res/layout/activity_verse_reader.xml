@@ -1,109 +1,200 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_primary">
 
+    <!-- 導覽工具列：膠囊容器 + 分隔線做出 segmented control 的視覺，窄螢幕可橫向捲動 -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="10dp"
+        android:clipToPadding="false"
         android:scrollbars="none">
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/bg_toolbar_segmented"
+            android:divider="@drawable/divider_toolbar_segment"
+            android:showDividers="middle"
             android:gravity="center_vertical">
 
             <Button
                 android:id="@+id/btnOpenSearch"
                 style="?attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="44dp"
                 android:minWidth="0dp"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:textSize="18sp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textSize="16sp"
+                android:textColor="@color/text_primary"
+                android:contentDescription="搜尋"
                 android:text="🔍" />
 
             <Button
                 android:id="@+id/btnOldTestament"
                 style="?attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="舊約 ▾" />
+                android:layout_height="44dp"
+                android:minWidth="0dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textAllCaps="false"
+                android:textColor="@color/text_primary"
+                android:text="舊約" />
 
             <Button
                 android:id="@+id/btnNewTestament"
                 style="?attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="新約 ▾" />
+                android:layout_height="44dp"
+                android:minWidth="0dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textAllCaps="false"
+                android:textColor="@color/text_primary"
+                android:text="新約" />
 
             <Button
                 android:id="@+id/btnChapterPicker"
                 style="?attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="章 ▾" />
+                android:layout_height="44dp"
+                android:minWidth="0dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textAllCaps="false"
+                android:textColor="@color/text_primary"
+                android:text="章" />
 
             <Button
                 android:id="@+id/btnThemeSettings"
                 style="?attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="44dp"
                 android:minWidth="0dp"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:textSize="18sp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textSize="16sp"
+                android:textColor="@color/text_primary"
+                android:contentDescription="外觀設定"
                 android:text="⚙" />
 
         </LinearLayout>
 
     </HorizontalScrollView>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/divider" />
-
+    <!-- 閱讀設定列：沿用同一組膠囊樣式，跟上排維持一致 -->
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_toolbar_segmented"
+        android:divider="@drawable/divider_toolbar_segment"
+        android:showDividers="middle"
+        android:gravity="center_vertical">
 
         <Button
             android:id="@+id/btnToggleParallel"
+            style="?attr/borderlessButtonStyle"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="44dp"
             android:layout_weight="1"
+            android:minWidth="0dp"
+            android:textAllCaps="false"
+            android:textColor="@color/text_primary"
             android:text="顯示中英對照" />
 
         <Button
             android:id="@+id/btnDecreaseFont"
+            style="?attr/borderlessButtonStyle"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="44dp"
             android:minWidth="0dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:textColor="@color/text_primary"
+            android:contentDescription="縮小字級"
             android:text="A-" />
 
         <Button
             android:id="@+id/btnIncreaseFont"
+            style="?attr/borderlessButtonStyle"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="44dp"
             android:minWidth="0dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:textColor="@color/text_primary"
+            android:contentDescription="放大字級"
             android:text="A+" />
 
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerVerses"
+    <!-- 目前位置標題：每次 loadChapter 完成後由程式更新，是獨立一列，不會被浮動按鈕蓋到 -->
+    <TextView
+        android:id="@+id/textCurrentLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="18dp"
+        android:paddingBottom="14dp"
+        android:textColor="@color/text_primary"
+        android:textSize="21sp"
+        android:textStyle="bold"
+        android:text="" />
+
+    <!-- 經文區與浮動按鈕疊在一起，按鈕只蓋在閱讀區上方，不會壓到上面的工具列與標題列 -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1">
+
+        <!-- 底部留白 + clipToPadding=false：最後幾節可以捲到浮動按鈕上方，不會被永久擋住 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerVerses"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="72dp" />
+
+        <!-- 初始為停用樣式，等第一次 loadChapter 完成後才由程式依邊界狀況啟用 -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabPreviousChapter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="16dp"
+            android:alpha="0.3"
+            android:enabled="false"
+            android:contentDescription="上一章"
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_chapter_previous" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabNextChapter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:alpha="0.3"
+            android:enabled="false"
+            android:contentDescription="下一章"
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_chapter_next" />
+
+    </FrameLayout>
 
 </LinearLayout>

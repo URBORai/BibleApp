@@ -1,8 +1,16 @@
 package com.UWelBAlRai.bibleapp
 
+import android.content.Context
 import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Handler
 import android.os.Looper
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
+import android.text.style.SuperscriptSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,7 +51,8 @@ class VerseAdapter(
 
     override fun onBindViewHolder(holder: VerseViewHolder, position: Int) {
         val verse = verses[position]
-        holder.binding.textCuv.text = "${verse.verse}　${verse.cuvText}"
+        val context = holder.binding.root.context
+        holder.binding.textCuv.text = buildVerseText(context, verse)
         holder.binding.textCuv.textSize = textSizeSp
 
         if (showParallel) {
@@ -54,7 +63,6 @@ class VerseAdapter(
             holder.binding.layoutParallel.visibility = View.GONE
         }
 
-        val context = holder.binding.root.context
         holder.binding.root.setBackgroundColor(
             if (position == highlightedPosition) {
                 ContextCompat.getColor(context, R.color.highlight_verse)
@@ -65,6 +73,25 @@ class VerseAdapter(
     }
 
     override fun getItemCount(): Int = verses.size
+
+    // 節號用上標小字 + 強調色接在本文前面：跟本文明確區隔，但不切斷段落的連續閱讀感。
+    // 用 Span 而非獨立 TextView，經文才能自然環繞換行，字級縮放時節號也會等比跟著變
+    private fun buildVerseText(context: Context, verse: ParallelVerse): SpannableString {
+        val label = verse.verse.toString()
+        val spannable = SpannableString("$label ${verse.cuvText}")
+        val end = label.length
+
+        spannable.setSpan(RelativeSizeSpan(0.7f), 0, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannable.setSpan(SuperscriptSpan(), 0, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannable.setSpan(StyleSpan(Typeface.BOLD), 0, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannable.setSpan(
+            ForegroundColorSpan(ContextCompat.getColor(context, R.color.verse_number)),
+            0,
+            end,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        return spannable
+    }
 
     // 切換章節時整批替換資料，重置高亮狀態
     fun updateVerses(newVerses: List<ParallelVerse>) {

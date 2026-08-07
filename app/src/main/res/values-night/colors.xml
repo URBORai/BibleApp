@@ -10,6 +10,8 @@
     <color name="text_tertiary">#A0A0A0</color>
     <color name="divider">#383838</color>
     <color name="highlight_verse">#7A5C00</color>
+    <!-- 節號強調色：深色底下改用亮版，維持可辨識度 -->
+    <color name="verse_number">#F0B357</color>
 
     <!-- 深色背景下提高亮度以維持可辨識度 -->
     <color name="keyword1">#FF6B6B</color>
