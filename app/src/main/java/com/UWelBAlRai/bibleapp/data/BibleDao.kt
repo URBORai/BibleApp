@@ -46,6 +46,49 @@ interface BibleDao {
     """)
     suspend fun searchText(versionCode: String, keyword: String): List<Verse>
 
+    // 多關鍵字組合查詢（最多 3 個）：useAnd = true 用 AND 組合，false 用 OR 組合
+    // 空白的第 2、3 關鍵字會被忽略，不參與條件判斷
+    suspend fun searchTextMulti(versionCode: String, keywords: List<String>, useAnd: Boolean): List<Verse> {
+        val trimmed = keywords.map { it.trim() }.filter { it.isNotEmpty() }.take(3)
+        if (trimmed.isEmpty()) return emptyList()
+        val kw1 = trimmed.getOrElse(0) { "" }
+        val kw2 = trimmed.getOrElse(1) { "" }
+        val kw3 = trimmed.getOrElse(2) { "" }
+        return searchTextMultiInternal(versionCode, kw1, kw2, kw3, useAnd)
+    }
+
+    // searchTextMulti 的實際查詢：
+    // AND 模式下，空白的 kw2/kw3 視為「恆真」條件（不限制）
+    // OR 模式下，空白的 kw2/kw3 視為「恆假」條件（不貢獻任何比對）
+    @Query("""
+        SELECT v.* FROM verse v
+        JOIN bible_version bv ON v.version_id = bv.id
+        WHERE bv.code = :versionCode
+            AND (
+                (:useAnd = 1
+                    AND v.text LIKE '%' || :kw1 || '%'
+                    AND (:kw2 = '' OR v.text LIKE '%' || :kw2 || '%')
+                    AND (:kw3 = '' OR v.text LIKE '%' || :kw3 || '%')
+                )
+                OR
+                (:useAnd = 0
+                    AND (
+                        v.text LIKE '%' || :kw1 || '%'
+                        OR (:kw2 != '' AND v.text LIKE '%' || :kw2 || '%')
+                        OR (:kw3 != '' AND v.text LIKE '%' || :kw3 || '%')
+                    )
+                )
+            )
+        ORDER BY v.book, v.chapter, v.verse
+    """)
+    suspend fun searchTextMultiInternal(
+        versionCode: String,
+        kw1: String,
+        kw2: String,
+        kw3: String,
+        useAnd: Boolean
+    ): List<Verse>
+
     // 書卷清單（給導覽選單用）
     @Query("SELECT * FROM book_order ORDER BY order_index")
     suspend fun getAllBooks(): List<BookOrder>

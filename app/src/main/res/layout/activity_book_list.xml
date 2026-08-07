@@ -1,6 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/recyclerBooks"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"/>
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
+
+            <EditText
+                android:id="@+id/editSearchKeyword1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="關鍵字（必填）"
+                android:singleLine="true"
+                android:imeOptions="actionSearch" />
+
+            <CheckBox
+                android:id="@+id/checkboxMultiKeyword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="多關鍵字" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutMultiKeywordFields"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <EditText
+                android:id="@+id/editSearchKeyword2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="關鍵字 2（可留空）"
+                android:singleLine="true" />
+
+            <EditText
+                android:id="@+id/editSearchKeyword3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="關鍵字 3（可留空）"
+                android:singleLine="true"
+                android:imeOptions="actionSearch" />
+
+            <RadioGroup
+                android:id="@+id/radioGroupAndOr"
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/radioAnd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="AND（同時符合）" />
+
+                <RadioButton
+                    android:id="@+id/radioOr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="OR（符合其一）" />
+
+            </RadioGroup>
+
+        </LinearLayout>
+
+        <RadioGroup
+            android:id="@+id/radioGroupSearchLanguage"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/radioChinese"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="中文" />
+
+            <RadioButton
+                android:id="@+id/radioEnglish"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="英文" />
+
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/btnSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="搜尋" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnContinueReading"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="繼續閱讀"
+        android:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerBooks"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>

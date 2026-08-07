@@ -1,5 +1,8 @@
 package com.UWelBAlRai.bibleapp
 
+import android.graphics.Color
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +21,9 @@ class VerseAdapter(
             notifyDataSetChanged()
         }
 
+    private var highlightedPosition: Int = -1
+    private val highlightHandler = Handler(Looper.getMainLooper())
+
     class VerseViewHolder(val binding: ItemVerseBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerseViewHolder {
@@ -35,7 +41,24 @@ class VerseAdapter(
         } else {
             holder.binding.textNkjv.visibility = View.GONE
         }
+
+        holder.binding.root.setBackgroundColor(
+            if (position == highlightedPosition) Color.parseColor("#FFF59D") else Color.TRANSPARENT
+        )
     }
 
     override fun getItemCount(): Int = verses.size
+
+    // 短暫高亮指定位置的節，2.5 秒後自動恢復
+    fun highlightVerse(position: Int) {
+        if (position < 0 || position >= verses.size) return
+        highlightedPosition = position
+        notifyItemChanged(position)
+        highlightHandler.postDelayed({
+            if (highlightedPosition == position) {
+                highlightedPosition = -1
+                notifyItemChanged(position)
+            }
+        }, 2500)
+    }
 }
