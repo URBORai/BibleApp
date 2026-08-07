@@ -3,6 +3,7 @@ package com.UWelBAlRai.bibleapp
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -12,6 +13,7 @@ import com.UWelBAlRai.bibleapp.data.BibleDatabase
 import com.UWelBAlRai.bibleapp.data.BookOrder
 import com.UWelBAlRai.bibleapp.databinding.ActivityVerseReaderBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 // App 啟動首頁：沒有上次閱讀記錄時預設載入創世記第 1 章
@@ -22,7 +24,9 @@ class VerseReaderActivity : AppCompatActivity() {
         private const val KEY_LAST_READ_BOOK = "last_read_book"
         private const val KEY_LAST_READ_CHAPTER = "last_read_chapter"
         private const val KEY_FONT_SIZE = "verse_font_size"
+        private const val KEY_SHOW_PARALLEL = "show_parallel"
 
+        private const val DEFAULT_SHOW_PARALLEL = false
         private const val DEFAULT_FONT_SIZE = 18f
         private const val MIN_FONT_SIZE = 14f
         private const val MAX_FONT_SIZE = 28f
@@ -30,6 +34,17 @@ class VerseReaderActivity : AppCompatActivity() {
 
         private const val DEFAULT_BOOK_CODE = "GEN"
         private const val DEFAULT_CHAPTER = 1
+
+        // 搜尋結果跳轉時帶進來的 Intent extras
+        const val EXTRA_BOOK_CODE = "book_code"
+        const val EXTRA_CHAPTER = "chapter"
+        const val EXTRA_VERSE = "verse"
+
+        // onSaveInstanceState 用的 key：重建後要恢復的是「畫面當下真正在看的位置」，
+        // 而不是當初把這個 Activity 帶起來的 Intent 指定的位置
+        private const val STATE_BOOK_CODE = "state_book_code"
+        private const val STATE_CHAPTER = "state_chapter"
+        private const val STATE_SHOW_PARALLEL = "state_show_parallel"
 
         // 舊約 39 卷排在 book_order 排序後的最前面，其餘為新約，用清單位置判斷，不依賴 order_index 的實際數值
         private const val OLD_TESTAMENT_BOOK_COUNT = 39
@@ -49,6 +64,9 @@ class VerseReaderActivity : AppCompatActivity() {
     // 目前書卷的章節清單，翻頁與「章」選單共用；章號不保證連號，一律用清單位置前後移動
     private var currentChapters: List<Int> = emptyList()
 
+    // 進行中的章節載入。新的載入會先取消舊的，避免慢查詢回來後覆蓋掉較新的結果
+    private var loadJob: Job? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -63,12 +81,15 @@ class VerseReaderActivity : AppCompatActivity() {
         binding.recyclerVerses.layoutManager = LinearLayoutManager(this)
         adapter = VerseAdapter()
         adapter.textSizeSp = prefs.getFloat(KEY_FONT_SIZE, DEFAULT_FONT_SIZE)
+        adapter.showParallel = prefs.getBoolean(KEY_SHOW_PARALLEL, DEFAULT_SHOW_PARALLEL)
         binding.recyclerVerses.adapter = adapter
 
+        // 啟動時就依偏好把按鈕文字校正一次，不能沿用版面裡的預設字串
+        updateParallelButtonText()
         binding.btnToggleParallel.setOnClickListener {
             adapter.showParallel = !adapter.showParallel
-            binding.btnToggleParallel.text =
-                if (adapter.showParallel) "隱藏英文對照" else "顯示中英對照"
+            prefs.edit().putBoolean(KEY_SHOW_PARALLEL, adapter.showParallel).apply()
+            updateParallelButtonText()
         }
 
         binding.btnIncreaseFont.setOnClickListener { changeFontSize(FONT_SIZE_STEP) }
@@ -90,23 +111,80 @@ class VerseReaderActivity : AppCompatActivity() {
         binding.fabPreviousChapter.setOnClickListener { goToAdjacentChapter(-1) }
         binding.fabNextChapter.setOnClickListener { goToAdjacentChapter(1) }
 
-        val intentBook = intent.getStringExtra("book_code")
-        val intentChapter = intent.getIntExtra("chapter", -1)
-        val intentVerse = intent.getIntExtra("verse", -1)
+        restoreInitialPosition(savedInstanceState)
+    }
 
-        val (initialBook, initialChapter) = if (intentBook != null && intentChapter != -1) {
-            intentBook to intentChapter
-        } else {
-            val savedBook = prefs.getString(KEY_LAST_READ_BOOK, null)
-            val savedChapter = prefs.getInt(KEY_LAST_READ_CHAPTER, -1)
-            if (savedBook != null && savedChapter != -1) {
-                savedBook to savedChapter
-            } else {
-                DEFAULT_BOOK_CODE to DEFAULT_CHAPTER
+    // 決定啟動要顯示哪一章，優先序刻意如此：
+    // 1. savedInstanceState — 旋轉／主題切換等重建，恢復重建前畫面實際在看的位置
+    // 2. Intent extras — 從搜尋結果新跳轉進來（讀完就消耗掉，重建時不會再被讀到）
+    // 3. SharedPreferences — 上次閱讀記錄
+    // 4. 預設創世記第 1 章
+    private fun restoreInitialPosition(savedInstanceState: Bundle?) {
+        if (savedInstanceState != null) {
+            val book = savedInstanceState.getString(STATE_BOOK_CODE)
+            val chapter = savedInstanceState.getInt(STATE_CHAPTER, -1)
+            adapter.showParallel =
+                savedInstanceState.getBoolean(STATE_SHOW_PARALLEL, adapter.showParallel)
+            updateParallelButtonText()
+            if (book != null && chapter != -1) {
+                loadChapter(book, chapter)
+                return
             }
         }
 
-        loadChapter(initialBook, initialChapter, intentVerse)
+        val navigation = consumeNavigationExtras()
+        if (navigation != null) {
+            loadChapter(navigation.bookCode, navigation.chapter, navigation.verse)
+            return
+        }
+
+        val savedBook = prefs.getString(KEY_LAST_READ_BOOK, null)
+        val savedChapter = prefs.getInt(KEY_LAST_READ_CHAPTER, -1)
+        if (savedBook != null && savedChapter != -1) {
+            loadChapter(savedBook, savedChapter)
+        } else {
+            loadChapter(DEFAULT_BOOK_CODE, DEFAULT_CHAPTER)
+        }
+    }
+
+    // singleTop 之下，從搜尋結果跳回來時走這裡而不是重建 Activity：
+    // 只換掉顯示的章節，字級／對照開關／back stack 都原封不動
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // 換掉 getIntent() 的回傳值，之後的 consumeNavigationExtras() 才讀得到新的 extras
+        setIntent(intent)
+        val navigation = consumeNavigationExtras() ?: return
+        loadChapter(navigation.bookCode, navigation.chapter, navigation.verse)
+    }
+
+    private data class NavigationTarget(val bookCode: String, val chapter: Int, val verse: Int)
+
+    // 讀出跳轉參數後就把 extras 從 Intent 移除。
+    // 這是第 2 點的關鍵：Intent 會跟著 Activity 一起活著，不清掉的話每次重建都會再讀到同一組
+    // 舊參數，把使用者後來手動翻到的章節蓋掉
+    private fun consumeNavigationExtras(): NavigationTarget? {
+        val bookCode = intent.getStringExtra(EXTRA_BOOK_CODE)
+        val chapter = intent.getIntExtra(EXTRA_CHAPTER, -1)
+        val verse = intent.getIntExtra(EXTRA_VERSE, -1)
+        if (bookCode == null || chapter == -1) return null
+
+        intent.removeExtra(EXTRA_BOOK_CODE)
+        intent.removeExtra(EXTRA_CHAPTER)
+        intent.removeExtra(EXTRA_VERSE)
+        return NavigationTarget(bookCode, chapter, verse)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(STATE_BOOK_CODE, currentBookCode)
+        outState.putInt(STATE_CHAPTER, currentChapter)
+        outState.putBoolean(STATE_SHOW_PARALLEL, adapter.showParallel)
+    }
+
+    // 按鈕文字描述「按下去會發生什麼」，啟動套用偏好與點擊切換兩個進入點共用
+    private fun updateParallelButtonText() {
+        binding.btnToggleParallel.text =
+            if (adapter.showParallel) "隱藏英文對照" else "顯示中英對照"
     }
 
     private fun changeFontSize(delta: Float) {
@@ -115,38 +193,59 @@ class VerseReaderActivity : AppCompatActivity() {
         prefs.edit().putFloat(KEY_FONT_SIZE, newSize).apply()
     }
 
-    // 章節切換一律走這裡，不離開畫面：更新目前狀態、記住上次閱讀位置、換資料
+    // 章節切換一律走這裡，不離開畫面
     private fun loadChapter(bookCode: String, chapter: Int, targetVerse: Int = -1) {
-        lifecycleScope.launch {
-            val verses = db.bibleDao().getParallelChapter(bookCode, chapter)
+        startChapterJob { showChapter(bookCode, chapter, targetVerse) }
+    }
 
-            currentBookCode = bookCode
-            currentChapter = chapter
-            currentChapters = db.bibleDao().getChapterList(bookCode)
+    // 所有會改動顯示章節的操作共用的進入點：
+    // 取消還沒回來的上一次查詢，並在查詢期間把翻頁按鈕鎖住，
+    // 避免連點時用到還沒更新的 currentChapter／currentChapters 算出錯誤的目標
+    private fun startChapterJob(block: suspend () -> Unit) {
+        loadJob?.cancel()
+        setNavEnabled(binding.fabPreviousChapter, false)
+        setNavEnabled(binding.fabNextChapter, false)
+        loadJob = lifecycleScope.launch { block() }
+    }
 
-            prefs.edit()
-                .putString(KEY_LAST_READ_BOOK, bookCode)
-                .putInt(KEY_LAST_READ_CHAPTER, chapter)
-                .apply()
+    // 實際換資料：更新目前狀態、記住上次閱讀位置、更新標題與按鈕
+    private suspend fun showChapter(bookCode: String, chapter: Int, targetVerse: Int = -1) {
+        val verses = db.bibleDao().getParallelChapter(bookCode, chapter)
 
-            adapter.updateVerses(verses)
-            binding.recyclerVerses.scrollToPosition(0)
-            updateChapterNavButtons()
+        currentBookCode = bookCode
+        currentChapter = chapter
+        currentChapters = db.bibleDao().getChapterList(bookCode)
 
-            // 所有切換途徑（舊約／新約選單、章選單、左右浮動按鈕）都會走到這裡，標題一律同步更新
-            val bookName = books().find { it.bookCode == bookCode }?.cnName ?: bookCode
-            binding.textCurrentLocation.text = "$bookName 第${chapter}章"
+        prefs.edit()
+            .putString(KEY_LAST_READ_BOOK, bookCode)
+            .putInt(KEY_LAST_READ_CHAPTER, chapter)
+            .apply()
 
-            // 從搜尋結果進入時，捲動到對應節並短暫高亮
-            if (targetVerse != -1) {
-                val targetIndex = verses.indexOfFirst { it.verse == targetVerse }
-                if (targetIndex != -1) {
+        adapter.updateVerses(verses)
+        binding.recyclerVerses.scrollToPosition(0)
+        updateChapterNavButtons()
+
+        // 查無資料（例如帶了無效的 book_code）時給明確提示，不要留一片白畫面
+        binding.textChapterEmpty.visibility = if (verses.isEmpty()) View.VISIBLE else View.GONE
+
+        // 所有切換途徑（舊約／新約選單、章選單、左右浮動按鈕）都會走到這裡，標題一律同步更新
+        val bookName = books().find { it.bookCode == bookCode }?.cnName
+        binding.textCurrentLocation.text = if (bookName != null) {
+            "$bookName 第${chapter}章"
+        } else {
+            // 連書卷都查不到，至少讓標題誠實反映要求的位置，不要假裝載入成功
+            "$bookCode 第${chapter}章"
+        }
+
+        // 從搜尋結果進入時，捲動到對應節並短暫高亮
+        if (targetVerse != -1) {
+            val targetIndex = verses.indexOfFirst { it.verse == targetVerse }
+            if (targetIndex != -1) {
+                binding.recyclerVerses.post {
+                    binding.recyclerVerses.scrollToPosition(targetIndex)
+                    // 等 scrollToPosition 觸發的 layout 完成、目標 ViewHolder 已綁定後再套用高亮
                     binding.recyclerVerses.post {
-                        binding.recyclerVerses.scrollToPosition(targetIndex)
-                        // 等 scrollToPosition 觸發的 layout 完成、目標 ViewHolder 已綁定後再套用高亮
-                        binding.recyclerVerses.post {
-                            adapter.highlightVerse(targetIndex)
-                        }
+                        adapter.highlightVerse(targetIndex)
                     }
                 }
             }
@@ -164,19 +263,25 @@ class VerseReaderActivity : AppCompatActivity() {
     // 章節翻頁：本卷內還有前／後一章就直接換章，
     // 已經在本卷首章／末章則跨到相鄰書卷的末章／首章，只有整本聖經的頭尾才無路可走
     private fun goToAdjacentChapter(step: Int) {
-        lifecycleScope.launch {
+        // 跟 loadChapter 共用同一個 job：翻頁與其他切換途徑互相取消，不會有兩個載入同時進行
+        startChapterJob {
             val chapterIndex = currentChapters.indexOf(currentChapter)
             val targetIndex = chapterIndex + step
             if (chapterIndex != -1 && targetIndex in currentChapters.indices) {
-                loadChapter(currentBookCode, currentChapters[targetIndex])
-                return@launch
+                showChapter(currentBookCode, currentChapters[targetIndex])
+                return@startChapterJob
             }
 
-            val adjacentBook = adjacentBook(step) ?: return@launch
-            val chapters = db.bibleDao().getChapterList(adjacentBook.bookCode)
+            val adjacentBook = adjacentBook(step)
+            val chapters = adjacentBook?.let { db.bibleDao().getChapterList(it.bookCode) }
             // 往前翻進入前一卷的最後一章，往後翻進入下一卷的第一章
-            val chapter = (if (step < 0) chapters.lastOrNull() else chapters.firstOrNull()) ?: return@launch
-            loadChapter(adjacentBook.bookCode, chapter)
+            val chapter = if (step < 0) chapters?.lastOrNull() else chapters?.firstOrNull()
+            if (adjacentBook == null || chapter == null) {
+                // 沒有相鄰章節可去，把進入 job 時鎖住的按鈕狀態還原
+                updateChapterNavButtons()
+                return@startChapterJob
+            }
+            showChapter(adjacentBook.bookCode, chapter)
         }
     }
 

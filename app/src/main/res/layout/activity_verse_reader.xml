@@ -170,6 +170,19 @@
             android:clipToPadding="false"
             android:paddingBottom="72dp" />
 
+        <!-- 查無經文時的提示，蓋在經文區中央；平時 gone，由 showChapter() 切換 -->
+        <TextView
+            android:id="@+id/textChapterEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="24dp"
+            android:gravity="center"
+            android:textColor="@color/text_secondary"
+            android:textSize="16sp"
+            android:visibility="gone"
+            android:text="找不到這個章節" />
+
         <!-- 初始為停用樣式，等第一次 loadChapter 完成後才由程式依邊界狀況啟用 -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabPreviousChapter"

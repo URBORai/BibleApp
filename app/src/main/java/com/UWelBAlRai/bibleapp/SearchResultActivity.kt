@@ -52,9 +52,13 @@ class SearchResultActivity : AppCompatActivity() {
                 keywords = keywords
             ) { verse ->
                 val intent = Intent(this@SearchResultActivity, VerseReaderActivity::class.java)
-                intent.putExtra("book_code", verse.book)
-                intent.putExtra("chapter", verse.chapter)
-                intent.putExtra("verse", verse.verse)
+                // Reader 宣告為 singleTop，但它此刻在堆疊底層、不在頂端，光靠 singleTop 仍會疊新的一份。
+                // CLEAR_TOP 會把 Search／SearchResult 收掉並讓既有的 Reader 收到 onNewIntent，
+                // 回到「Reader 只有一個、返回鍵直接離開 App」的行為
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                intent.putExtra(VerseReaderActivity.EXTRA_BOOK_CODE, verse.book)
+                intent.putExtra(VerseReaderActivity.EXTRA_CHAPTER, verse.chapter)
+                intent.putExtra(VerseReaderActivity.EXTRA_VERSE, verse.verse)
                 startActivity(intent)
             }
         }

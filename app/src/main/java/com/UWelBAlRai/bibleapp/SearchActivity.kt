@@ -15,6 +15,11 @@ class SearchActivity : AppCompatActivity() {
     companion object {
         private const val PREFS_NAME = "bible_app_prefs"
         private const val KEY_SEARCH_VERSION_CODE = "search_version_code"
+        private const val KEY_SEARCH_MULTI_KEYWORD = "search_multi_keyword"
+        private const val KEY_SEARCH_USE_AND = "search_use_and"
+
+        private const val DEFAULT_MULTI_KEYWORD = false
+        private const val DEFAULT_USE_AND = true
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,8 +41,25 @@ class SearchActivity : AppCompatActivity() {
             prefs.edit().putString(KEY_SEARCH_VERSION_CODE, versionCode).apply()
         }
 
+        // 比照上面的語言偏好：先套用存下來的狀態，再掛監聽，避免還原時被自己的監聽器又寫一次
+        val savedMultiKeyword = prefs.getBoolean(KEY_SEARCH_MULTI_KEYWORD, DEFAULT_MULTI_KEYWORD)
+        binding.checkboxMultiKeyword.isChecked = savedMultiKeyword
+        // 勾選狀態是程式設定的，不會觸發下面的監聽器，展開／收合要自己補一次
+        binding.layoutMultiKeywordFields.visibility =
+            if (savedMultiKeyword) View.VISIBLE else View.GONE
+
         binding.checkboxMultiKeyword.setOnCheckedChangeListener { _, isChecked ->
             binding.layoutMultiKeywordFields.visibility = if (isChecked) View.VISIBLE else View.GONE
+            prefs.edit().putBoolean(KEY_SEARCH_MULTI_KEYWORD, isChecked).apply()
+        }
+
+        val savedUseAnd = prefs.getBoolean(KEY_SEARCH_USE_AND, DEFAULT_USE_AND)
+        binding.radioAnd.isChecked = savedUseAnd
+        binding.radioOr.isChecked = !savedUseAnd
+
+        binding.radioGroupAndOr.setOnCheckedChangeListener { _, checkedId ->
+            val useAnd = checkedId == binding.radioAnd.id
+            prefs.edit().putBoolean(KEY_SEARCH_USE_AND, useAnd).apply()
         }
 
         fun performSearch() {

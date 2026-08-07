@@ -23,6 +23,11 @@ class VerseAdapter(
     initialVerses: List<ParallelVerse> = emptyList()
 ) : RecyclerView.Adapter<VerseAdapter.VerseViewHolder>() {
 
+    companion object {
+        // 從搜尋結果跳轉過來時，目標節的高亮持續時間
+        private const val HIGHLIGHT_DURATION_MS = 2500L
+    }
+
     private var verses: List<ParallelVerse> = initialVerses
 
     // 是否顯示英文對照，預設關閉（單語模式）
@@ -41,6 +46,10 @@ class VerseAdapter(
 
     private var highlightedPosition: Int = -1
     private val highlightHandler = Handler(Looper.getMainLooper())
+
+    // 保留 Runnable 參考才能精準移除；Adapter 被拆離 RecyclerView 時一定要清掉，
+    // 否則這個延遲任務會抓著 Adapter（進而抓著 ViewHolder 與 Activity 的 Context）不放
+    private var pendingHighlightClear: Runnable? = null
 
     class VerseViewHolder(val binding: ItemVerseBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -95,6 +104,7 @@ class VerseAdapter(
 
     // 切換章節時整批替換資料，重置高亮狀態
     fun updateVerses(newVerses: List<ParallelVerse>) {
+        cancelPendingHighlightClear()
         verses = newVerses
         highlightedPosition = -1
         notifyDataSetChanged()
@@ -103,13 +113,32 @@ class VerseAdapter(
     // 短暫高亮指定位置的節，2.5 秒後自動恢復
     fun highlightVerse(position: Int) {
         if (position < 0 || position >= verses.size) return
+        // 前一次的清除任務先取消，避免它提早把這次的高亮抹掉
+        cancelPendingHighlightClear()
+
         highlightedPosition = position
         notifyItemChanged(position)
-        highlightHandler.postDelayed({
+
+        val clear = Runnable {
+            pendingHighlightClear = null
             if (highlightedPosition == position) {
                 highlightedPosition = -1
                 notifyItemChanged(position)
             }
-        }, 2500)
+        }
+        pendingHighlightClear = clear
+        highlightHandler.postDelayed(clear, HIGHLIGHT_DURATION_MS)
+    }
+
+    private fun cancelPendingHighlightClear() {
+        pendingHighlightClear?.let { highlightHandler.removeCallbacks(it) }
+        pendingHighlightClear = null
+    }
+
+    // Activity 銷毀或換 Adapter 時 RecyclerView 都會呼叫這裡，
+    // 是清掉未執行延遲任務最可靠的時機（不必再讓 Activity 記得手動通知）
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        cancelPendingHighlightClear()
     }
 }

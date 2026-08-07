@@ -12,8 +12,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.BibleApp" >
+        <!-- singleTop：從搜尋結果跳回閱讀畫面時重用既有 instance（走 onNewIntent），
+             不再往 back stack 疊第二個 Reader -->
         <activity
             android:name=".VerseReaderActivity"
+            android:launchMode="singleTop"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
