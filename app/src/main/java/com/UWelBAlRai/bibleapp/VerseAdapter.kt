@@ -6,6 +6,7 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.UWelBAlRai.bibleapp.data.ParallelVerse
 import com.UWelBAlRai.bibleapp.databinding.ItemVerseBinding
@@ -16,6 +17,13 @@ class VerseAdapter(
 
     // 是否顯示英文對照，預設關閉（單語模式）
     var showParallel: Boolean = false
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
+    // 中文經文字級（sp），英文對照會依此等比縮小 4sp，下限 12sp
+    var textSizeSp: Float = 18f
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -34,16 +42,23 @@ class VerseAdapter(
     override fun onBindViewHolder(holder: VerseViewHolder, position: Int) {
         val verse = verses[position]
         holder.binding.textCuv.text = "${verse.verse}　${verse.cuvText}"
+        holder.binding.textCuv.textSize = textSizeSp
 
         if (showParallel) {
-            holder.binding.textNkjv.visibility = View.VISIBLE
+            holder.binding.layoutParallel.visibility = View.VISIBLE
             holder.binding.textNkjv.text = verse.nkjvText ?: "（此節無對應英文譯文）"
+            holder.binding.textNkjv.textSize = (textSizeSp - 4f).coerceAtLeast(12f)
         } else {
-            holder.binding.textNkjv.visibility = View.GONE
+            holder.binding.layoutParallel.visibility = View.GONE
         }
 
+        val context = holder.binding.root.context
         holder.binding.root.setBackgroundColor(
-            if (position == highlightedPosition) Color.parseColor("#FFF59D") else Color.TRANSPARENT
+            if (position == highlightedPosition) {
+                ContextCompat.getColor(context, R.color.highlight_verse)
+            } else {
+                Color.TRANSPARENT
+            }
         )
     }
 

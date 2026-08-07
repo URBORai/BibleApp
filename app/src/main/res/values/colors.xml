@@ -7,4 +7,20 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- 語意化配色（淺色）：同名色值在 values-night/colors.xml 另有深色版本，
+         畫面一律引用這些語意色名稱，不要在版面裡寫死色碼 -->
+    <color name="background_primary">#FFFFFF</color>
+    <color name="background_surface">#F5F5F5</color>
+    <color name="background_header">#E0E0E0</color>
+    <color name="text_primary">#1A1A1A</color>
+    <color name="text_secondary">#666666</color>
+    <color name="text_tertiary">#555555</color>
+    <color name="divider">#DDDDDD</color>
+    <color name="highlight_verse">#FFF59D</color>
+
+    <!-- 多關鍵字標註色（紅／藍／綠），淺色背景下的可讀版本 -->
+    <color name="keyword1">#D32F2F</color>
+    <color name="keyword2">#1565C0</color>
+    <color name="keyword3">#2E7D32</color>
 </resources>

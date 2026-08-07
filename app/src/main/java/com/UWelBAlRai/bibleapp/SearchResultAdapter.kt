@@ -1,13 +1,14 @@
 package com.UWelBAlRai.bibleapp
 
-import android.graphics.Color
 import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.UWelBAlRai.bibleapp.data.Verse
 import com.UWelBAlRai.bibleapp.databinding.ItemSearchHeaderBinding
@@ -52,7 +53,8 @@ class SearchResultAdapter(
                 val verse = item.verse
                 holder as ResultViewHolder
                 holder.binding.textSearchLocation.text = "第${verse.chapter}章 第${verse.verse}節"
-                holder.binding.textSearchSnippet.text = highlightKeywords(verse.text, keywords)
+                holder.binding.textSearchSnippet.text =
+                    highlightKeywords(holder.binding.root, verse.text, keywords)
                 holder.binding.root.setOnClickListener { onClick(verse) }
             }
         }
@@ -60,21 +62,26 @@ class SearchResultAdapter(
 
     override fun getItemCount(): Int = items.size
 
-    // 關鍵字 1、2、3 依序對應紅、藍、綠，方便使用者分辨標註對應哪個欄位
-    private val keywordColors = listOf(Color.RED, Color.parseColor("#1565C0"), Color.parseColor("#2E7D32"))
+    // 關鍵字 1、2、3 依序對應紅、藍、綠（色值定義在 colors.xml，深色模式下會自動換成亮版）
+    private fun keywordColors(view: View) = listOf(
+        ContextCompat.getColor(view.context, R.color.keyword1),
+        ContextCompat.getColor(view.context, R.color.keyword2),
+        ContextCompat.getColor(view.context, R.color.keyword3)
+    )
 
     // 不分大小寫比對出現位置，但標註範圍取自原文字串，維持原本大小寫顯示
     // 多個關鍵字重疊時，以先出現（index 較小）的關鍵字顏色為主，後面的直接略過該段落
-    private fun highlightKeywords(text: String, keywords: List<String>): SpannableString {
+    private fun highlightKeywords(view: View, text: String, keywords: List<String>): SpannableString {
         val spannable = SpannableString(text)
         val lowerText = text.lowercase()
         val claimed = BooleanArray(text.length)
+        val colors = keywordColors(view)
 
         keywords.forEachIndexed { keywordIndex, rawKeyword ->
             val keyword = rawKeyword.trim()
             if (keyword.isEmpty()) return@forEachIndexed
             val lowerKeyword = keyword.lowercase()
-            val color = keywordColors.getOrElse(keywordIndex) { Color.RED }
+            val color = colors.getOrElse(keywordIndex) { colors[0] }
 
             var startIndex = 0
             while (startIndex <= lowerText.length) {

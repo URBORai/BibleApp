@@ -3,20 +3,24 @@ package com.UWelBAlRai.bibleapp
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.UWelBAlRai.bibleapp.data.BibleDatabase
 import com.UWelBAlRai.bibleapp.databinding.ActivitySearchResultBinding
 import kotlinx.coroutines.launch
 
-class SearchResultActivity : ComponentActivity() {
+class SearchResultActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val binding = ActivitySearchResultBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowInsetsUtil.applySystemBarPadding(binding.root)
 
         // 保留原始 3 個欄位順序（含空白項目），讓 Adapter 能依欄位順序分配標註顏色
         val keywords = intent.getStringArrayListExtra("keywords") ?: return

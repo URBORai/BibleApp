@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 語意化配色（深色）：色名需與 values/colors.xml 完全對應，
+         系統會依目前 day/night 狀態自動選用正確版本 -->
+    <color name="background_primary">#121212</color>
+    <color name="background_surface">#1E1E1E</color>
+    <color name="background_header">#2A2A2A</color>
+    <color name="text_primary">#F0F0F0</color>
+    <color name="text_secondary">#B0B0B0</color>
+    <color name="text_tertiary">#A0A0A0</color>
+    <color name="divider">#383838</color>
+    <color name="highlight_verse">#7A5C00</color>
+
+    <!-- 深色背景下提高亮度以維持可辨識度 -->
+    <color name="keyword1">#FF6B6B</color>
+    <color name="keyword2">#64B5F6</color>
+    <color name="keyword3">#81C784</color>
+</resources>
