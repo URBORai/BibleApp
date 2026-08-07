@@ -12,8 +12,10 @@ import com.UWelBAlRai.bibleapp.data.ParallelVerse
 import com.UWelBAlRai.bibleapp.databinding.ItemVerseBinding
 
 class VerseAdapter(
-    private val verses: List<ParallelVerse>
+    initialVerses: List<ParallelVerse> = emptyList()
 ) : RecyclerView.Adapter<VerseAdapter.VerseViewHolder>() {
+
+    private var verses: List<ParallelVerse> = initialVerses
 
     // 是否顯示英文對照，預設關閉（單語模式）
     var showParallel: Boolean = false
@@ -63,6 +65,13 @@ class VerseAdapter(
     }
 
     override fun getItemCount(): Int = verses.size
+
+    // 切換章節時整批替換資料，重置高亮狀態
+    fun updateVerses(newVerses: List<ParallelVerse>) {
+        verses = newVerses
+        highlightedPosition = -1
+        notifyDataSetChanged()
+    }
 
     // 短暫高亮指定位置的節，2.5 秒後自動恢復
     fun highlightVerse(position: Int) {

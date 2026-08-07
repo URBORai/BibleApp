@@ -3,7 +3,7 @@ package com.UWelBAlRai.bibleapp
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 
-// 深色模式選項的儲存與套用邏輯，MainActivity 的設定入口跟 BibleApplication 啟動時都會用到
+// 深色模式選項的儲存與套用邏輯，VerseReaderActivity 的設定入口跟 BibleApplication 啟動時都會用到
 object ThemePrefs {
     private const val PREFS_NAME = "bible_app_prefs"
     private const val KEY_THEME_MODE = "theme_mode"
