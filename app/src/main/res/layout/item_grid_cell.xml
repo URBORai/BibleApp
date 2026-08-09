@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 網格選擇器的單一方框按鈕。寬度撐滿 GridLayoutManager 分給它的欄寬，
+     高度固定 48dp 以維持可點擊區域；格子間距靠 margin 做，不另外加 ItemDecoration -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/textGridCell"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:layout_margin="4dp"
+    android:background="@drawable/bg_grid_cell"
+    android:gravity="center"
+    android:maxLines="1"
+    android:ellipsize="end"
+    android:paddingStart="2dp"
+    android:paddingEnd="2dp"
+    android:textColor="@color/text_primary"
+    android:textSize="15sp"
+    tools:text="創" />

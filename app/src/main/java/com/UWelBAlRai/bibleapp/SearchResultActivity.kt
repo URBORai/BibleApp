@@ -43,7 +43,8 @@ class SearchResultActivity : AppCompatActivity() {
             val listItems = mutableListOf<SearchListItem>()
             for (book in books) {
                 val bookResults = resultsByBook[book.bookCode] ?: continue
-                listItems.add(SearchListItem.Header(book.cnName))
+                // 分組標題的書卷名也跟著介面語言，才不會跟閱讀畫面的標題列一邊中一邊英
+                listItems.add(SearchListItem.Header(book.displayName(this@SearchResultActivity)))
                 bookResults.forEach { verse -> listItems.add(SearchListItem.Result(verse)) }
             }
 

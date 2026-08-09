@@ -6,7 +6,10 @@
     android:layout_height="match_parent"
     android:background="@color/background_primary">
 
-    <!-- 導覽工具列：膠囊容器 + 分隔線做出 segmented control 的視覺，窄螢幕可橫向捲動 -->
+    <!-- 導覽工具列：膠囊容器 + 分隔線做出 segmented control 的視覺。
+         按鈕內距刻意收窄（12dp），讓英文介面的 Old / New / Chapter 也能整排塞進 360dp 寬的螢幕。
+         真的還是塞不下時（超大系統字級、超窄螢幕）仍可橫向捲動，
+         fadingEdge 讓超出的部分淡出，看起來是「還有內容可以捲」而不是「被切掉」 -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,6 +17,8 @@
         android:paddingEnd="12dp"
         android:paddingTop="10dp"
         android:clipToPadding="false"
+        android:requiresFadingEdge="horizontal"
+        android:fadingEdgeLength="24dp"
         android:scrollbars="none">
 
         <LinearLayout
@@ -31,12 +36,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="44dp"
                 android:minWidth="0dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
                 android:textSize="16sp"
                 android:textColor="@color/text_primary"
-                android:contentDescription="搜尋"
-                android:text="🔍" />
+                android:contentDescription="@string/action_search"
+                android:text="@string/icon_search" />
 
             <Button
                 android:id="@+id/btnOldTestament"
@@ -44,11 +49,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="44dp"
                 android:minWidth="0dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
                 android:textAllCaps="false"
                 android:textColor="@color/text_primary"
-                android:text="舊約" />
+                android:contentDescription="@string/cd_old_testament"
+                android:text="@string/old_testament" />
 
             <Button
                 android:id="@+id/btnNewTestament"
@@ -56,11 +62,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="44dp"
                 android:minWidth="0dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
                 android:textAllCaps="false"
                 android:textColor="@color/text_primary"
-                android:text="新約" />
+                android:contentDescription="@string/cd_new_testament"
+                android:text="@string/new_testament" />
 
             <Button
                 android:id="@+id/btnChapterPicker"
@@ -68,11 +75,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="44dp"
                 android:minWidth="0dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
                 android:textAllCaps="false"
                 android:textColor="@color/text_primary"
-                android:text="章" />
+                android:text="@string/chapter_picker" />
 
             <Button
                 android:id="@+id/btnThemeSettings"
@@ -80,12 +87,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="44dp"
                 android:minWidth="0dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
                 android:textSize="16sp"
                 android:textColor="@color/text_primary"
-                android:contentDescription="外觀設定"
-                android:text="⚙" />
+                android:contentDescription="@string/appearance_settings"
+                android:text="@string/icon_settings" />
 
         </LinearLayout>
 
@@ -113,7 +120,7 @@
             android:minWidth="0dp"
             android:textAllCaps="false"
             android:textColor="@color/text_primary"
-            android:text="顯示中英對照" />
+            android:text="@string/toggle_parallel_show" />
 
         <Button
             android:id="@+id/btnDecreaseFont"
@@ -124,8 +131,8 @@
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
             android:textColor="@color/text_primary"
-            android:contentDescription="縮小字級"
-            android:text="A-" />
+            android:contentDescription="@string/cd_decrease_font"
+            android:text="@string/icon_font_decrease" />
 
         <Button
             android:id="@+id/btnIncreaseFont"
@@ -136,8 +143,8 @@
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
             android:textColor="@color/text_primary"
-            android:contentDescription="放大字級"
-            android:text="A+" />
+            android:contentDescription="@string/cd_increase_font"
+            android:text="@string/icon_font_increase" />
 
     </LinearLayout>
 
@@ -181,7 +188,36 @@
             android:textColor="@color/text_secondary"
             android:textSize="16sp"
             android:visibility="gone"
-            android:text="找不到這個章節" />
+            android:text="@string/chapter_not_found" />
+
+        <!-- 選取某一節後浮出的複製列：沿用工具列的膠囊樣式，置中在兩顆翻頁按鈕之間，
+             不會蓋到經文（RecyclerView 已有 72dp 底部留白可捲上來）。平時 gone -->
+        <LinearLayout
+            android:id="@+id/layoutCopyBar"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_toolbar_segmented"
+            android:elevation="6dp"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/btnCopyVerse"
+                style="?attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:minWidth="0dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:textAllCaps="false"
+                android:textColor="@color/text_primary"
+                android:contentDescription="@string/cd_copy_verse"
+                android:text="@string/action_copy_verse" />
+
+        </LinearLayout>
 
         <!-- 初始為停用樣式，等第一次 loadChapter 完成後才由程式依邊界狀況啟用 -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -192,7 +228,7 @@
             android:layout_margin="16dp"
             android:alpha="0.3"
             android:enabled="false"
-            android:contentDescription="上一章"
+            android:contentDescription="@string/cd_previous_chapter"
             app:fabSize="mini"
             app:srcCompat="@drawable/ic_chapter_previous" />
 
@@ -204,7 +240,7 @@
             android:layout_margin="16dp"
             android:alpha="0.3"
             android:enabled="false"
-            android:contentDescription="下一章"
+            android:contentDescription="@string/cd_next_chapter"
             app:fabSize="mini"
             app:srcCompat="@drawable/ic_chapter_next" />
 

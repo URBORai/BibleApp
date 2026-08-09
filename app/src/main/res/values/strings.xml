@@ -1,3 +1,77 @@
 <resources>
+    <!-- 預設（中文）介面文案。英文版在 values-en/strings.xml，
+         系統語言為英文時自動套用；使用者也可在「外觀設定」裡手動指定。
+         注意：這裡只有「介面文字」。聖經經文本身（CUV／NKJV）一律來自資料庫，
+         不隨介面語言改變，也不要搬到這裡。 -->
+
     <string name="app_name">BibleApp</string>
+
+    <!-- 共用動作 -->
+    <string name="action_search">搜尋</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_done">完成</string>
+    <string name="action_copy_verse">複製這節</string>
+    <string name="cd_copy_verse">複製這節經文</string>
+
+    <!-- 閱讀畫面：工具列 -->
+    <!-- 工具列按鈕標籤要短，才不會把這排擠爆；完整名稱放在 cd_* 給 TalkBack 唸 -->
+    <string name="old_testament">舊約</string>
+    <string name="new_testament">新約</string>
+    <string name="cd_old_testament">舊約</string>
+    <string name="cd_new_testament">新約</string>
+    <string name="chapter_picker">章</string>
+    <!-- 對照按鈕：文案講的是「對照版本」那一邊。中文介面下對照是英文，
+         英文介面（values-en）下對照變成中文，兩邊各自寫死自己的語境即可 -->
+    <string name="toggle_parallel_show">顯示英文對照</string>
+    <string name="toggle_parallel_hide">隱藏英文對照</string>
+    <string name="cd_decrease_font">縮小字級</string>
+    <string name="cd_increase_font">放大字級</string>
+    <string name="cd_previous_chapter">上一章</string>
+    <string name="cd_next_chapter">下一章</string>
+
+    <!-- 閱讀畫面：內容
+         current_location 的 %1$s 是書卷名，來自資料庫的 cn_name，不受介面語言影響 -->
+    <string name="current_location">%1$s 第%2$d章</string>
+    <string name="chapter_not_found">找不到這個章節</string>
+    <string name="no_parallel_text">（此節無對應英文譯文）</string>
+    <string name="page_number">p.%1$d</string>
+    <string name="copied_verse">已複製這節經文</string>
+    <string name="clipboard_label">經文</string>
+
+    <!-- 外觀設定對話框 -->
+    <string name="appearance_settings">外觀設定</string>
+    <string name="appearance_theme_section">外觀模式</string>
+    <string name="theme_system">跟隨系統</string>
+    <string name="theme_light">淺色</string>
+    <string name="theme_dark">深色</string>
+    <string name="appearance_language_section">顯示語言</string>
+    <string name="language_system">跟隨系統</string>
+    <string name="show_page_number">顯示頁碼</string>
+    <string name="show_page_number_hint">在每節右下角標示紙本頁碼（僅中文和合本有此資料）</string>
+
+    <!-- 語言名稱一律以該語言自己的寫法呈現，兩種介面語言下都一樣，不翻譯 -->
+    <string name="language_chinese" translatable="false">中文</string>
+    <string name="language_english" translatable="false">English</string>
+
+    <!-- 搜尋畫面。
+         search_version_* 選的是「要查哪個版本的經文」（CUV／NKJV），
+         跟上面的「顯示語言」是兩回事，不要合併 -->
+    <string name="search_title">搜尋經文</string>
+    <string name="search_hint_keyword1">關鍵字（必填）</string>
+    <string name="search_multi_keyword">多關鍵字</string>
+    <string name="search_hint_keyword2">關鍵字 2（可留空）</string>
+    <string name="search_hint_keyword3">關鍵字 3（可留空）</string>
+    <string name="search_match_and">AND（同時符合）</string>
+    <string name="search_match_or">OR（符合其一）</string>
+    <string name="search_version_chinese">中文</string>
+    <string name="search_version_english">英文</string>
+    <string name="search_no_result">查無符合的經文</string>
+    <string name="search_result_location">第%1$d章 第%2$d節</string>
+
+    <!-- 純圖示／符號按鈕，兩種語言相同，不需翻譯 -->
+    <string name="icon_search" translatable="false">🔍</string>
+    <string name="icon_settings" translatable="false">⚙</string>
+    <string name="icon_font_decrease" translatable="false">A-</string>
+    <string name="icon_font_increase" translatable="false">A+</string>
+
 </resources>

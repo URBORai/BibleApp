@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- English UI: the reading text is NKJV-primary with CUV as the parallel version.
+         See values/bools.xml for the full rationale. -->
+    <bool name="ui_prefers_english">true</bool>
+</resources>

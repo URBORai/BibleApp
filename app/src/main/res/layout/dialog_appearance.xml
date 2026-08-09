@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 齒輪（外觀設定）對話框：深淺色模式 + 介面顯示語言 + 閱讀相關的顯示開關。
+     三段用分隔線與小標題區隔；內容較高時外層 ScrollView 保證小螢幕也能捲到底 -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:text="@string/appearance_theme_section" />
+
+        <RadioGroup
+            android:id="@+id/groupThemeMode"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/radioThemeSystem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:textColor="@color/text_primary"
+                android:text="@string/theme_system" />
+
+            <RadioButton
+                android:id="@+id/radioThemeLight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:textColor="@color/text_primary"
+                android:text="@string/theme_light" />
+
+            <RadioButton
+                android:id="@+id/radioThemeDark"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:textColor="@color/text_primary"
+                android:text="@string/theme_dark" />
+
+        </RadioGroup>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@color/divider" />
+
+        <!-- 介面顯示語言：只換 UI 文字，不影響經文版本（那個在搜尋畫面另外選） -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:text="@string/appearance_language_section" />
+
+        <RadioGroup
+            android:id="@+id/groupLanguage"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/radioLanguageSystem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:textColor="@color/text_primary"
+                android:text="@string/language_system" />
+
+            <RadioButton
+                android:id="@+id/radioLanguageChinese"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:textColor="@color/text_primary"
+                android:text="@string/language_chinese" />
+
+            <RadioButton
+                android:id="@+id/radioLanguageEnglish"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:textColor="@color/text_primary"
+                android:text="@string/language_english" />
+
+        </RadioGroup>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@color/divider" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switchPageNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="44dp"
+            android:textColor="@color/text_primary"
+            android:text="@string/show_page_number" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:text="@string/show_page_number_hint" />
+
+    </LinearLayout>
+
+</ScrollView>

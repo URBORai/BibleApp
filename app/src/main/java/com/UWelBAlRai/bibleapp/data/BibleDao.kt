@@ -15,27 +15,37 @@ interface BibleDao {
     """)
     suspend fun getChapter(versionCode: String, book: String, chapter: Int): List<Verse>
 
-    // 中英對照查詢：以 CUV 為主，LEFT JOIN NKJV
-    // 對不上的節（版節差異三處）nkjvText 會是 null，交給 UI 層顯示「此節無對應」
+    // 對照查詢：以 :primaryVersion 為主表，LEFT JOIN :secondaryVersion。
+    // 主體版本由介面語言決定（中文介面 CUV 為主、英文介面 NKJV 為主），所以版本代碼是參數，
+    // 不再寫死——LEFT JOIN 的方向決定「哪些節會出現」，把方向做對才不會漏節。
+    // 對不上的節（版節差異三處）secondaryText 會是 null，交給 UI 層顯示「此節無對應」。
+    //
+    // pageNo 用 COALESCE 取兩邊非 null 的那個：page_no 只有 CUV 有值，
+    // 不論 CUV 當主表還是對照表，頁碼都撈得到
     @Query("""
         SELECT
-            cuv.book AS book,
-            cuv.chapter AS chapter,
-            cuv.verse AS verse,
-            cuv.text AS cuvText,
-            nkjv.text AS nkjvText,
-            cuv.page_no AS pageNo
-        FROM verse cuv
-        LEFT JOIN verse nkjv
-            ON cuv.book = nkjv.book
-            AND cuv.chapter = nkjv.chapter
-            AND cuv.verse = nkjv.verse
-            AND nkjv.version_id = (SELECT id FROM bible_version WHERE code = 'NKJV')
-        WHERE cuv.version_id = (SELECT id FROM bible_version WHERE code = 'CUV')
-            AND cuv.book = :book AND cuv.chapter = :chapter
-        ORDER BY cuv.verse
+            p.book AS book,
+            p.chapter AS chapter,
+            p.verse AS verse,
+            p.text AS primaryText,
+            s.text AS secondaryText,
+            COALESCE(p.page_no, s.page_no) AS pageNo
+        FROM verse p
+        LEFT JOIN verse s
+            ON p.book = s.book
+            AND p.chapter = s.chapter
+            AND p.verse = s.verse
+            AND s.version_id = (SELECT id FROM bible_version WHERE code = :secondaryVersion)
+        WHERE p.version_id = (SELECT id FROM bible_version WHERE code = :primaryVersion)
+            AND p.book = :book AND p.chapter = :chapter
+        ORDER BY p.verse
     """)
-    suspend fun getParallelChapter(book: String, chapter: Int): List<ParallelVerse>
+    suspend fun getParallelChapter(
+        primaryVersion: String,
+        secondaryVersion: String,
+        book: String,
+        chapter: Int
+    ): List<ParallelVerse>
 
     // 關鍵字搜尋（Phase 3 會用到，先放著）
     @Query("""

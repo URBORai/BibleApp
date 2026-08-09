@@ -1,26 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 極簡閱讀排版：節與節之間靠留白區隔，不畫分隔線，維持連續閱讀的段落感 -->
+<!-- 極簡閱讀排版：節與節之間靠留白區隔，不畫分隔線，維持連續閱讀的段落感。
+     整列可點擊：點一下選取這節（背景反白），選取狀態由 VerseAdapter 換底色表示。
+     ripple 放在 foreground，才不會跟程式設定的選取／高亮底色互相覆蓋 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/background_primary"
+    android:foreground="?attr/selectableItemBackground"
     android:paddingStart="20dp"
     android:paddingEnd="20dp"
     android:paddingTop="9dp"
     android:paddingBottom="9dp">
 
-    <!-- 節號以上標小字的形式接在本文前面（樣式由 VerseAdapter 用 Span 套用），
-         行距放寬到 1.45 倍讓長段落讀起來不擁擠 -->
+    <!-- 經文主體（版本由介面語言決定，見 VerseReaderActivity.primaryVersionCode）。
+         節號以上標小字的形式接在本文前面（樣式由 VerseAdapter 用 Span 套用），
+         行距放寬到 1.45 倍讓長段落讀起來不擁擠。
+         文字本身不可選取（textIsSelectable 預設 false），點擊一律交給外層整列處理 -->
     <TextView
-        android:id="@+id/textCuv"
+        android:id="@+id/textPrimary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/text_primary"
         android:textSize="18sp"
         android:lineSpacingExtra="2dp"
         android:lineSpacingMultiplier="1.45"
-        android:text="CUV 經文內容" />
+        tools:text="CUV 經文內容" />
 
     <LinearLayout
         android:id="@+id/layoutParallel"
@@ -37,7 +43,7 @@
             android:background="@color/divider" />
 
         <TextView
-            android:id="@+id/textNkjv"
+            android:id="@+id/textSecondary"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -46,8 +52,21 @@
             android:textStyle="italic"
             android:lineSpacingExtra="2dp"
             android:lineSpacingMultiplier="1.35"
-            android:text="NKJV verse text" />
+            tools:text="NKJV verse text" />
 
     </LinearLayout>
+
+    <!-- 紙本頁碼：獨立一個小標籤靠右下，預設隱藏，由 VerseAdapter 依偏好與 page_no 是否為 null 決定。
+         刻意不併進經文的 Spannable，複製這節時才不會把頁碼一起帶走 -->
+    <TextView
+        android:id="@+id/textPageNo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="2dp"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp"
+        android:visibility="gone"
+        tools:text="p.1" />
 
 </LinearLayout>

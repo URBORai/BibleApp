@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -12,7 +13,7 @@
         android:layout_height="wrap_content"
         android:textSize="13sp"
         android:textColor="@color/text_secondary"
-        android:text="第1章 第1節" />
+        tools:text="第1章 第1節" />
 
     <TextView
         android:id="@+id/textSearchSnippet"
@@ -21,6 +22,6 @@
         android:layout_marginTop="4dp"
         android:textColor="@color/text_primary"
         android:textSize="16sp"
-        android:text="經文片段內容" />
+        tools:text="經文片段內容" />
 
 </LinearLayout>

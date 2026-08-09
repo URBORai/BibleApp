@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App 支援的介面語言清單。Android 13 (API 33) 以上，系統設定裡的
+     「應用程式語言」頁面會據此列出可選語言；33 以下由 AppCompat 自行處理，
+     這份清單不影響行為，但留著讓兩邊的語言集合維持一致 -->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="zh" />
+    <locale android:name="en" />
+</locale-config>

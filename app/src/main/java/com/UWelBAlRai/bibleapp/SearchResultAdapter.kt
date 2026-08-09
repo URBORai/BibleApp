@@ -52,7 +52,11 @@ class SearchResultAdapter(
             is SearchListItem.Result -> {
                 val verse = item.verse
                 holder as ResultViewHolder
-                holder.binding.textSearchLocation.text = "第${verse.chapter}章 第${verse.verse}節"
+                holder.binding.textSearchLocation.text = holder.binding.root.context.getString(
+                    R.string.search_result_location,
+                    verse.chapter,
+                    verse.verse
+                )
                 holder.binding.textSearchSnippet.text =
                     highlightKeywords(holder.binding.root, verse.text, keywords)
                 holder.binding.root.setOnClickListener { onClick(verse) }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 網格選擇器的方框按鈕底：填色與外框都走語意化色資源，深色模式由 values-night 自動換版。
+     外層 ripple 讓點擊有回饋，跟工具列膠囊 (bg_toolbar_segmented) 用同一組色與框線寬度 -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/colorControlHighlight">
+
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/white" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/background_surface" />
+            <stroke
+                android:width="1dp"
+                android:color="@color/divider" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+
+</ripple>

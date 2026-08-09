@@ -10,6 +10,8 @@
     <color name="text_tertiary">#A0A0A0</color>
     <color name="divider">#383838</color>
     <color name="highlight_verse">#7A5C00</color>
+    <!-- 選取底色的深色版：亮度壓低但仍明顯高於背景，經文文字維持可讀 -->
+    <color name="selected_verse">#274257</color>
     <!-- 節號強調色：深色底下改用亮版，維持可辨識度 -->
     <color name="verse_number">#F0B357</color>
 

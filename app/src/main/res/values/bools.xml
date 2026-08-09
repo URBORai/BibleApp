@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 介面語言是否為英文。由資源系統依 locale 解析（values = 中文 → false，
+         values-en = 英文 → true），所以「跟隨系統語言」與 App 內手動切換兩種途徑
+         都會自動反映，程式不必自己判斷 Locale。
+
+         經文主體版本跟著它走：中文介面以 CUV 為主、NKJV 為對照；英文介面反過來。
+         注意這跟搜尋畫面的「查哪個版本」是兩回事，那個由使用者自己選、存在別的偏好裡 -->
+    <bool name="ui_prefers_english">false</bool>
+</resources>

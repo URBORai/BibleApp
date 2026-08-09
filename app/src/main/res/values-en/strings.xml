@@ -1,0 +1,65 @@
+<resources>
+    <!-- English UI strings. Only interface text lives here — Bible text itself (CUV / NKJV)
+         always comes from the database and is unaffected by the interface language.
+         Strings marked translatable="false" in values/strings.xml (icon glyphs, language
+         names) are intentionally absent: they fall back to the default resource. -->
+
+    <string name="app_name">BibleApp</string>
+
+    <!-- Shared actions -->
+    <string name="action_search">Search</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_done">Done</string>
+    <string name="action_copy_verse">Copy verse</string>
+    <string name="cd_copy_verse">Copy this verse</string>
+
+    <!-- Reader: toolbar -->
+    <!-- Short labels: the full names overflow the toolbar. Full names live in cd_* for TalkBack. -->
+    <string name="old_testament">Old</string>
+    <string name="new_testament">New</string>
+    <string name="cd_old_testament">Old Testament</string>
+    <string name="cd_new_testament">New Testament</string>
+    <string name="chapter_picker">Chapter</string>
+    <!-- In the English UI the reading text is NKJV, so the parallel version is Chinese. -->
+    <string name="toggle_parallel_show">Show Chinese</string>
+    <string name="toggle_parallel_hide">Hide Chinese</string>
+    <string name="cd_decrease_font">Decrease text size</string>
+    <string name="cd_increase_font">Increase text size</string>
+    <string name="cd_previous_chapter">Previous chapter</string>
+    <string name="cd_next_chapter">Next chapter</string>
+
+    <!-- Reader: content. %1$s is the book name from the database (Chinese), which the
+         interface language does not change. -->
+    <string name="current_location">%1$s %2$d</string>
+    <string name="chapter_not_found">Chapter not found</string>
+    <string name="no_parallel_text">(No matching Chinese verse)</string>
+    <string name="page_number">p.%1$d</string>
+    <string name="copied_verse">Verse copied</string>
+    <string name="clipboard_label">Bible verse</string>
+
+    <!-- Appearance dialog -->
+    <string name="appearance_settings">Appearance</string>
+    <string name="appearance_theme_section">Theme</string>
+    <string name="theme_system">Follow system</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="appearance_language_section">Display language</string>
+    <string name="language_system">Follow system</string>
+    <string name="show_page_number">Show page numbers</string>
+    <string name="show_page_number_hint">Shows the printed page number at the bottom right of each verse (Chinese Union Version only).</string>
+
+    <!-- Search screen. search_version_* selects which Bible version to search (CUV / NKJV);
+         it is a separate concern from the display language above. -->
+    <string name="search_title">Search Scripture</string>
+    <string name="search_hint_keyword1">Keyword (required)</string>
+    <string name="search_multi_keyword">Multiple keywords</string>
+    <string name="search_hint_keyword2">Keyword 2 (optional)</string>
+    <string name="search_hint_keyword3">Keyword 3 (optional)</string>
+    <string name="search_match_and">AND (match all)</string>
+    <string name="search_match_or">OR (match any)</string>
+    <string name="search_version_chinese">Chinese (CUV)</string>
+    <string name="search_version_english">English (NKJV)</string>
+    <string name="search_no_result">No matching verses found</string>
+    <string name="search_result_location">Chapter %1$d, verse %2$d</string>
+
+</resources>

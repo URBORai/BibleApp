@@ -1,17 +1,26 @@
 package com.UWelBAlRai.bibleapp
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Build
 import android.os.Bundle
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.UWelBAlRai.bibleapp.data.BibleDatabase
 import com.UWelBAlRai.bibleapp.data.BookOrder
+import com.UWelBAlRai.bibleapp.data.ParallelVerse
 import com.UWelBAlRai.bibleapp.databinding.ActivityVerseReaderBinding
+import com.UWelBAlRai.bibleapp.databinding.DialogAppearanceBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -25,12 +34,20 @@ class VerseReaderActivity : AppCompatActivity() {
         private const val KEY_LAST_READ_CHAPTER = "last_read_chapter"
         private const val KEY_FONT_SIZE = "verse_font_size"
         private const val KEY_SHOW_PARALLEL = "show_parallel"
+        private const val KEY_SHOW_PAGE_NUMBER = "show_page_number"
 
         private const val DEFAULT_SHOW_PARALLEL = false
+        private const val DEFAULT_SHOW_PAGE_NUMBER = false
+        // 字級範圍涵蓋手機到平板：平板螢幕大、視距遠，原本的 28sp 上限在上面偏小。
+        // 上限拉到 44sp，級距同步從 2sp 放大到 3sp，從下限點到上限剛好 10 下，不必狂點
         private const val DEFAULT_FONT_SIZE = 18f
         private const val MIN_FONT_SIZE = 14f
-        private const val MAX_FONT_SIZE = 28f
-        private const val FONT_SIZE_STEP = 2f
+        private const val MAX_FONT_SIZE = 44f
+        private const val FONT_SIZE_STEP = 3f
+
+        // 經文版本代碼；哪一個當主體由介面語言決定，見 primaryVersionCode
+        private const val VERSION_CUV = "CUV"
+        private const val VERSION_NKJV = "NKJV"
 
         private const val DEFAULT_BOOK_CODE = "GEN"
         private const val DEFAULT_CHAPTER = 1
@@ -67,6 +84,19 @@ class VerseReaderActivity : AppCompatActivity() {
     // 進行中的章節載入。新的載入會先取消舊的，避免慢查詢回來後覆蓋掉較新的結果
     private var loadJob: Job? = null
 
+    // 目前被點選的那一節，複製按鈕的資料來源；沒有選取時為 null（複製列也跟著隱藏）
+    private var selectedVerse: ParallelVerse? = null
+
+    // 經文主體＝介面語言那一邊，對照＝另一邊。ui_prefers_english 是 locale 限定的
+    // bool 資源（values / values-en），所以「跟隨系統語言」與 App 內手動切換都自動生效。
+    // 語言一變 AppCompat 會重建 Activity，onCreate 重新載入章節時就換成新的主體版本
+    private val useEnglishAsPrimary: Boolean
+        get() = resources.getBoolean(R.bool.ui_prefers_english)
+    private val primaryVersionCode: String
+        get() = if (useEnglishAsPrimary) VERSION_NKJV else VERSION_CUV
+    private val secondaryVersionCode: String
+        get() = if (useEnglishAsPrimary) VERSION_CUV else VERSION_NKJV
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -82,7 +112,9 @@ class VerseReaderActivity : AppCompatActivity() {
         adapter = VerseAdapter()
         adapter.textSizeSp = prefs.getFloat(KEY_FONT_SIZE, DEFAULT_FONT_SIZE)
         adapter.showParallel = prefs.getBoolean(KEY_SHOW_PARALLEL, DEFAULT_SHOW_PARALLEL)
+        adapter.showPageNumber = prefs.getBoolean(KEY_SHOW_PAGE_NUMBER, DEFAULT_SHOW_PAGE_NUMBER)
         binding.recyclerVerses.adapter = adapter
+        setupVerseSelection()
 
         // 啟動時就依偏好把按鈕文字校正一次，不能沿用版面裡的預設字串
         updateParallelButtonText()
@@ -106,7 +138,7 @@ class VerseReaderActivity : AppCompatActivity() {
                 showChapterPicker(book)
             }
         }
-        binding.btnThemeSettings.setOnClickListener { showThemeDialog() }
+        binding.btnThemeSettings.setOnClickListener { showAppearanceDialog() }
 
         binding.fabPreviousChapter.setOnClickListener { goToAdjacentChapter(-1) }
         binding.fabNextChapter.setOnClickListener { goToAdjacentChapter(1) }
@@ -181,10 +213,63 @@ class VerseReaderActivity : AppCompatActivity() {
         outState.putBoolean(STATE_SHOW_PARALLEL, adapter.showParallel)
     }
 
+    // 點擊整節選取 → 浮出複製列 → 複製純經文。一次只選一節的規則由 VerseAdapter 維護
+    private fun setupVerseSelection() {
+        adapter.onSelectionChanged = { verse ->
+            selectedVerse = verse
+            binding.layoutCopyBar.visibility = if (verse != null) View.VISIBLE else View.GONE
+        }
+        binding.btnCopyVerse.setOnClickListener { copySelectedVerse() }
+
+        // 點在經文區的空白處（章末留白、或段落之間沒有節的地方）＝ 點畫面其他地方，取消選取。
+        // 點在某一節上不歸這裡管，交給該節自己的點擊處理（選取／取消選取）
+        val tapDetector = GestureDetector(
+            this,
+            object : GestureDetector.SimpleOnGestureListener() {
+                override fun onSingleTapUp(e: MotionEvent): Boolean = true
+            }
+        )
+        binding.recyclerVerses.addOnItemTouchListener(
+            object : RecyclerView.SimpleOnItemTouchListener() {
+                override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                    if (tapDetector.onTouchEvent(e) && rv.findChildViewUnder(e.x, e.y) == null) {
+                        adapter.clearSelection()
+                    }
+                    // 一律不攔截：捲動與整列點擊都照原本的路徑走，這裡只是旁聽
+                    return false
+                }
+            }
+        )
+    }
+
+    // 複製的是純經文，不含節號數字；有開對照時一併帶上對照版本（畫面上選到的就是這些）
+    private fun copySelectedVerse() {
+        val verse = selectedVerse ?: return
+        val text = buildString {
+            append(verse.primaryText)
+            if (adapter.showParallel) {
+                verse.secondaryText?.let { append("\n").append(it) }
+            }
+        }
+
+        val clipboard = getSystemService(ClipboardManager::class.java) ?: return
+        clipboard.setPrimaryClip(ClipData.newPlainText(getString(R.string.clipboard_label), text))
+
+        // Android 13 起系統自己會顯示複製完成的提示，再跳一次 Toast 會變成重複回饋
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            Toast.makeText(this, getString(R.string.copied_verse), Toast.LENGTH_SHORT).show()
+        }
+        adapter.clearSelection()
+    }
+
     // 按鈕文字描述「按下去會發生什麼」，啟動套用偏好與點擊切換兩個進入點共用
     private fun updateParallelButtonText() {
         binding.btnToggleParallel.text =
-            if (adapter.showParallel) "隱藏英文對照" else "顯示中英對照"
+            if (adapter.showParallel) {
+                getString(R.string.toggle_parallel_hide)
+            } else {
+                getString(R.string.toggle_parallel_show)
+            }
     }
 
     private fun changeFontSize(delta: Float) {
@@ -210,7 +295,8 @@ class VerseReaderActivity : AppCompatActivity() {
 
     // 實際換資料：更新目前狀態、記住上次閱讀位置、更新標題與按鈕
     private suspend fun showChapter(bookCode: String, chapter: Int, targetVerse: Int = -1) {
-        val verses = db.bibleDao().getParallelChapter(bookCode, chapter)
+        val verses = db.bibleDao()
+            .getParallelChapter(primaryVersionCode, secondaryVersionCode, bookCode, chapter)
 
         currentBookCode = bookCode
         currentChapter = chapter
@@ -229,13 +315,11 @@ class VerseReaderActivity : AppCompatActivity() {
         binding.textChapterEmpty.visibility = if (verses.isEmpty()) View.VISIBLE else View.GONE
 
         // 所有切換途徑（舊約／新約選單、章選單、左右浮動按鈕）都會走到這裡，標題一律同步更新
-        val bookName = books().find { it.bookCode == bookCode }?.cnName
-        binding.textCurrentLocation.text = if (bookName != null) {
-            "$bookName 第${chapter}章"
-        } else {
-            // 連書卷都查不到，至少讓標題誠實反映要求的位置，不要假裝載入成功
-            "$bookCode 第${chapter}章"
-        }
+        // 書卷名跟著介面語言換（book_order 有中英兩組名稱）
+        val bookName = books().find { it.bookCode == bookCode }?.displayName(this)
+        // 連書卷都查不到時退回 book_code，至少讓標題誠實反映要求的位置，不要假裝載入成功
+        binding.textCurrentLocation.text =
+            getString(R.string.current_location, bookName ?: bookCode, chapter)
 
         // 從搜尋結果進入時，捲動到對應節並短暫高亮
         if (targetVerse != -1) {
@@ -312,6 +396,7 @@ class VerseReaderActivity : AppCompatActivity() {
         fab.alpha = if (enabled) 1f else 0.3f
     }
 
+    // 書卷選擇：舊約 39 卷與新約 27 卷分開兩個網格，不混在同一份清單裡
     private fun showBookPicker(isOldTestament: Boolean) {
         lifecycleScope.launch {
             val books = books()
@@ -321,16 +406,20 @@ class VerseReaderActivity : AppCompatActivity() {
             } else {
                 books.drop(OLD_TESTAMENT_BOOK_COUNT)
             }
-            if (filtered.isEmpty()) return@launch
 
-            val names = filtered.map { it.cnName }.toTypedArray()
-            AlertDialog.Builder(this@VerseReaderActivity)
-                .setTitle(if (isOldTestament) "舊約" else "新約")
-                .setItems(names) { _, which ->
-                    // 選完書卷不直接跳第 1 章，接著讓使用者挑章節
-                    lifecycleScope.launch { showChapterPicker(filtered[which]) }
-                }
-                .show()
+            GridPicker.show(
+                context = this@VerseReaderActivity,
+                title = getString(
+                    if (isOldTestament) R.string.old_testament else R.string.new_testament
+                ),
+                items = filtered,
+                columns = GridPicker.COLUMNS_BOOK,
+                // 網格格子窄，用簡稱而不是全名才不會被截斷
+                label = { it.displayAbbr(this@VerseReaderActivity) }
+            ) { book ->
+                // 選完書卷不直接跳第 1 章，接著彈章節網格讓使用者挑
+                lifecycleScope.launch { showChapterPicker(book) }
+            }
         }
     }
 
@@ -341,31 +430,73 @@ class VerseReaderActivity : AppCompatActivity() {
         } else {
             db.bibleDao().getChapterList(book.bookCode)
         }
-        if (chapters.isEmpty()) return
 
-        val labels = chapters.map { "第 $it 章" }.toTypedArray()
-        AlertDialog.Builder(this)
-            .setTitle(book.cnName)
-            .setItems(labels) { _, which ->
-                loadChapter(book.bookCode, chapters[which])
-            }
-            .show()
+        GridPicker.show(
+            context = this,
+            title = book.displayName(this),
+            items = chapters,
+            columns = GridPicker.COLUMNS_CHAPTER,
+            label = { it.toString() }
+        ) { chapter ->
+            loadChapter(book.bookCode, chapter)
+        }
     }
 
-    private fun showThemeDialog() {
-        val options = arrayOf("跟隨系統", "淺色", "深色")
-        val modes = arrayOf(ThemePrefs.MODE_SYSTEM, ThemePrefs.MODE_LIGHT, ThemePrefs.MODE_DARK)
-        val checkedIndex = modes.indexOf(ThemePrefs.getSavedMode(this)).coerceAtLeast(0)
+    private fun showAppearanceDialog() {
+        val dialogBinding = DialogAppearanceBinding.inflate(layoutInflater)
 
-        AlertDialog.Builder(this)
-            .setTitle("外觀模式")
-            .setSingleChoiceItems(options, checkedIndex) { dialog, which ->
-                val selectedMode = modes[which]
-                ThemePrefs.saveMode(this, selectedMode)
-                ThemePrefs.applyMode(selectedMode)
-                dialog.dismiss()
+        val checkedId = when (ThemePrefs.getSavedMode(this)) {
+            ThemePrefs.MODE_LIGHT -> R.id.radioThemeLight
+            ThemePrefs.MODE_DARK -> R.id.radioThemeDark
+            else -> R.id.radioThemeSystem
+        }
+        dialogBinding.groupThemeMode.check(checkedId)
+
+        // 介面顯示語言：只換 UI 文字。經文顯示哪個版本、搜尋查哪個版本都不受這裡影響
+        val checkedLanguageId = when (LocalePrefs.getSavedLanguage(this)) {
+            LocalePrefs.LANG_CHINESE -> R.id.radioLanguageChinese
+            LocalePrefs.LANG_ENGLISH -> R.id.radioLanguageEnglish
+            else -> R.id.radioLanguageSystem
+        }
+        dialogBinding.groupLanguage.check(checkedLanguageId)
+
+        dialogBinding.switchPageNumber.isChecked = adapter.showPageNumber
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle(R.string.appearance_settings)
+            .setView(dialogBinding.root)
+            .setPositiveButton(R.string.action_done, null)
+            .create()
+
+        // 監聽器一律在初始值設定完之後才掛：先掛的話 check()／isChecked 會立刻觸發一次，
+        // 等於一開啟對話框就重新套用主題（Activity 會被 recreate）
+        dialogBinding.groupThemeMode.setOnCheckedChangeListener { _, id ->
+            val mode = when (id) {
+                R.id.radioThemeLight -> ThemePrefs.MODE_LIGHT
+                R.id.radioThemeDark -> ThemePrefs.MODE_DARK
+                else -> ThemePrefs.MODE_SYSTEM
             }
-            .setNegativeButton("取消", null)
-            .show()
+            ThemePrefs.saveMode(this, mode)
+            // 切換模式會讓 Activity 重建，對話框跟著消失，所以先自己收起來
+            dialog.dismiss()
+            ThemePrefs.applyMode(mode)
+        }
+        dialogBinding.groupLanguage.setOnCheckedChangeListener { _, id ->
+            val language = when (id) {
+                R.id.radioLanguageChinese -> LocalePrefs.LANG_CHINESE
+                R.id.radioLanguageEnglish -> LocalePrefs.LANG_ENGLISH
+                else -> LocalePrefs.MODE_SYSTEM
+            }
+            LocalePrefs.saveLanguage(this, language)
+            // 跟主題一樣：AppCompat 會為了套用新語言重建 Activity，先把對話框收起來
+            dialog.dismiss()
+            LocalePrefs.applyLanguage(language)
+        }
+        dialogBinding.switchPageNumber.setOnCheckedChangeListener { _, isChecked ->
+            adapter.showPageNumber = isChecked
+            prefs.edit().putBoolean(KEY_SHOW_PAGE_NUMBER, isChecked).apply()
+        }
+
+        dialog.show()
     }
 }

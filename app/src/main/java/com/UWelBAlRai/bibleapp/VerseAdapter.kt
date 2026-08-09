@@ -26,6 +26,10 @@ class VerseAdapter(
     companion object {
         // 從搜尋結果跳轉過來時，目標節的高亮持續時間
         private const val HIGHLIGHT_DURATION_MS = 2500L
+
+        // 對照經文相對於主體經文的字級比例，以及縮到最小也要看得清的下限
+        private const val SECONDARY_TEXT_RATIO = 0.78f
+        private const val MIN_SECONDARY_TEXT_SIZE_SP = 12f
     }
 
     private var verses: List<ParallelVerse> = initialVerses
@@ -44,8 +48,22 @@ class VerseAdapter(
             notifyDataSetChanged()
         }
 
+    // 是否在每節旁標示紙本頁碼，預設關閉；page_no 為 null 的節（例如英文對照或本來就沒資料）一律不顯示
+    var showPageNumber: Boolean = false
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
     private var highlightedPosition: Int = -1
     private val highlightHandler = Handler(Looper.getMainLooper())
+
+    // 目前被點選的節，一次只會有一個；NO_POSITION 代表沒有任何節被選取
+    private var selectedPosition: Int = RecyclerView.NO_POSITION
+
+    // 選取狀態變動時回報給畫面（選到的節，或 null 表示取消選取），
+    // 由 Activity 決定要不要顯示複製按鈕。Adapter 本身不碰剪貼簿也不管按鈕在哪
+    var onSelectionChanged: ((ParallelVerse?) -> Unit)? = null
 
     // 保留 Runnable 參考才能精準移除；Adapter 被拆離 RecyclerView 時一定要清掉，
     // 否則這個延遲任務會抓著 Adapter（進而抓著 ViewHolder 與 Activity 的 Context）不放
@@ -61,33 +79,84 @@ class VerseAdapter(
     override fun onBindViewHolder(holder: VerseViewHolder, position: Int) {
         val verse = verses[position]
         val context = holder.binding.root.context
-        holder.binding.textCuv.text = buildVerseText(context, verse)
-        holder.binding.textCuv.textSize = textSizeSp
+        holder.binding.textPrimary.text = buildVerseText(context, verse)
+        holder.binding.textPrimary.textSize = textSizeSp
 
         if (showParallel) {
             holder.binding.layoutParallel.visibility = View.VISIBLE
-            holder.binding.textNkjv.text = verse.nkjvText ?: "（此節無對應英文譯文）"
-            holder.binding.textNkjv.textSize = (textSizeSp - 4f).coerceAtLeast(12f)
+            holder.binding.textSecondary.text =
+                verse.secondaryText ?: context.getString(R.string.no_parallel_text)
+            // 對照文字按比例縮小而不是固定減 4sp：字級上限拉到 44sp 之後，
+            // 固定差值會讓兩者在大字級下幾乎一樣大，比例才能維持主從關係
+            holder.binding.textSecondary.textSize =
+                (textSizeSp * SECONDARY_TEXT_RATIO).coerceAtLeast(MIN_SECONDARY_TEXT_SIZE_SP)
+            // 斜體只適合拉丁字母：中文介面下對照是英文（斜體沒問題），
+            // 英文介面下對照變成中文，中文沒有真正的斜體字面，強制傾斜會變形，改回正體
+            val secondaryIsChinese = context.resources.getBoolean(R.bool.ui_prefers_english)
+            holder.binding.textSecondary.setTypeface(
+                null,
+                if (secondaryIsChinese) Typeface.NORMAL else Typeface.ITALIC
+            )
         } else {
             holder.binding.layoutParallel.visibility = View.GONE
         }
 
+        // 沒有頁碼資料時整個標籤收掉（GONE），不留空行也不顯示佔位字樣
+        val pageNo = verse.pageNo
+        if (showPageNumber && pageNo != null) {
+            holder.binding.textPageNo.visibility = View.VISIBLE
+            holder.binding.textPageNo.text = context.getString(R.string.page_number, pageNo)
+        } else {
+            holder.binding.textPageNo.visibility = View.GONE
+        }
+
+        // 選取底色優先於搜尋跳轉的高亮：使用者剛點下去的動作，回饋要蓋過 2.5 秒的殘留高亮
         holder.binding.root.setBackgroundColor(
-            if (position == highlightedPosition) {
-                ContextCompat.getColor(context, R.color.highlight_verse)
-            } else {
-                Color.TRANSPARENT
+            when {
+                position == selectedPosition ->
+                    ContextCompat.getColor(context, R.color.selected_verse)
+                position == highlightedPosition ->
+                    ContextCompat.getColor(context, R.color.highlight_verse)
+                else -> Color.TRANSPARENT
             }
         )
+
+        // 整列可點：中文、英文對照、頁碼都在這個 root 底下，點哪裡都算點到這一節
+        holder.binding.root.setOnClickListener {
+            // 用 bindingAdapterPosition 而不是閉包裡的 position：
+            // ViewHolder 會被回收重用，閉包捕捉到的 position 可能已經過期
+            val clicked = holder.bindingAdapterPosition
+            if (clicked != RecyclerView.NO_POSITION) selectVerse(clicked)
+        }
     }
 
     override fun getItemCount(): Int = verses.size
+
+    // 點擊選取：點已選取的那節等於取消，點別節則自動把前一節的選取收掉（一次只能選一節）
+    private fun selectVerse(position: Int) {
+        val previous = selectedPosition
+        selectedPosition = if (previous == position) RecyclerView.NO_POSITION else position
+
+        if (previous != RecyclerView.NO_POSITION) notifyItemChanged(previous)
+        if (selectedPosition != RecyclerView.NO_POSITION) notifyItemChanged(selectedPosition)
+
+        onSelectionChanged?.invoke(verses.getOrNull(selectedPosition))
+    }
+
+    // 取消選取，供畫面其他互動（點空白處、換章節、複製完成）呼叫；本來就沒選取時不做事
+    fun clearSelection() {
+        val previous = selectedPosition
+        if (previous == RecyclerView.NO_POSITION) return
+        selectedPosition = RecyclerView.NO_POSITION
+        notifyItemChanged(previous)
+        onSelectionChanged?.invoke(null)
+    }
 
     // 節號用上標小字 + 強調色接在本文前面：跟本文明確區隔，但不切斷段落的連續閱讀感。
     // 用 Span 而非獨立 TextView，經文才能自然環繞換行，字級縮放時節號也會等比跟著變
     private fun buildVerseText(context: Context, verse: ParallelVerse): SpannableString {
         val label = verse.verse.toString()
-        val spannable = SpannableString("$label ${verse.cuvText}")
+        val spannable = SpannableString("$label ${verse.primaryText}")
         val end = label.length
 
         spannable.setSpan(RelativeSizeSpan(0.7f), 0, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -102,12 +171,16 @@ class VerseAdapter(
         return spannable
     }
 
-    // 切換章節時整批替換資料，重置高亮狀態
+    // 切換章節時整批替換資料，重置高亮與選取狀態
+    // （選取的是「第幾列」，換了資料之後同一個位置已經是另一節，一定要清掉）
     fun updateVerses(newVerses: List<ParallelVerse>) {
         cancelPendingHighlightClear()
         verses = newVerses
         highlightedPosition = -1
+        val hadSelection = selectedPosition != RecyclerView.NO_POSITION
+        selectedPosition = RecyclerView.NO_POSITION
         notifyDataSetChanged()
+        if (hadSelection) onSelectionChanged?.invoke(null)
     }
 
     // 短暫高亮指定位置的節，2.5 秒後自動恢復

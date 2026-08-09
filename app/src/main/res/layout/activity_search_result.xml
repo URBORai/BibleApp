@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="查無符合的經文"
+        android:text="@string/search_no_result"
         android:textColor="@color/text_secondary"
         android:textSize="16sp"
         android:visibility="gone" />
