@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Noto Serif TC（思源宋體 繁中）字族，用於經文與書卷名等「內容」文字。
+
+     來源是 google/fonts 的官方可變字型 NotoSerifTC[wght].ttf（OFL-1.1，
+     授權全文一併放在 assets/NotoSerifTC-OFL.txt）。原始檔 16.85MB，
+     Android 透過 res/font 載入時會整份讀進 Java heap，實測直接 OutOfMemoryError，
+     所以改成：先把可變軸固定成 400／700 兩個靜態字重，再裁掉這個 App 用不到的字，
+     每個字重降到約 1.5MB。裁切依據是資料庫全部經文 + 書卷名 + 全部字串資源，
+     另外保留 ASCII、Latin-1、中英標點與全形符號當保底。
+
+     用靜態字重而不是可變字型，minSdk 24 就能正確吃到粗體，
+     不必依賴 API 26 才支援的 fontVariationSettings。
+
+     這個字型同時含有與中文字形調和的拉丁字母，所以 NKJV 英文對照直接共用同一族，
+     不必再多帶一個 Noto Serif 拉丁檔。
+
+     android: 命名空間的 font 屬性要 API 26 以上才看得懂，所以每個字重都同時寫一份
+     app: 命名空間的版本——API 24-25 由 AppCompat 讀 app: 那組，26 以上讀 android: 那組，
+     兩邊都指向同一個檔案，字重才不會在舊系統上失效。 -->
+<font-family xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="UnusedAttribute">
+
+    <font
+        android:font="@font/noto_serif_tc_regular"
+        android:fontStyle="normal"
+        android:fontWeight="400"
+        app:font="@font/noto_serif_tc_regular"
+        app:fontStyle="normal"
+        app:fontWeight="400" />
+
+    <font
+        android:font="@font/noto_serif_tc_bold"
+        android:fontStyle="normal"
+        android:fontWeight="700"
+        app:font="@font/noto_serif_tc_bold"
+        app:fontStyle="normal"
+        app:fontWeight="700" />
+
+</font-family>

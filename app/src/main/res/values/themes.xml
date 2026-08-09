@@ -3,7 +3,7 @@
     <!-- 用 NoActionBar：畫面自己有標題列/按鈕列，系統原生 ActionBar 沒有必要，
          留著反而在 AppCompatActivity 下疊出多一條列、擠壓版面 -->
     <style name="Theme.BibleApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- 強調色：primary 與 secondary 用同一組琥珀色，整個 App 只有一種強調色。
+        <!-- 強調色：primary 與 secondary 用同一組赤陶色，整個 App 只有一種強調色。
              色值定義在 colors.xml（values-night 另有深色版），這裡不寫死色碼。
              翻頁 FAB 吃 colorSecondary／colorOnSecondary，對話框按鈕文字吃 colorPrimary -->
         <item name="colorPrimary">@color/accent</item>
@@ -12,11 +12,41 @@
         <item name="colorSecondary">@color/accent</item>
         <item name="colorSecondaryVariant">@color/accent_variant</item>
         <item name="colorOnSecondary">@color/on_accent</item>
+
+        <!-- 讓「沒有自己指定背景」的系統元件（對話框、選單、視窗底）也跟著走暖色系，
+             否則 Material 預設的冷灰白會在暖底畫面裡顯得突兀 -->
+        <item name="android:colorBackground">@color/background_primary</item>
+        <item name="colorSurface">@color/background_surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+
+        <!-- 圓角統一放大，做出柔和的質感。small 給按鈕與網格格子、
+             medium 給卡片類、large 給對話框；dialogCornerRadius 是 API 28 才有的屬性，
+             28 以下沿用系統預設圓角，不影響功能 -->
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.BibleApp.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.BibleApp.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.BibleApp.Large</item>
+        <item name="android:dialogCornerRadius" tools:targetApi="28">20dp</item>
+
         <!-- Edge-to-edge：系統列透明，畫面內容自己用 WindowInsetsUtil 補 padding，
              搭配 windowLightStatusBar 讓狀態列圖示在淺色底下維持深色可辨識 -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
-        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="ShapeAppearance.BibleApp.Small" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">14dp</item>
+    </style>
+
+    <style name="ShapeAppearance.BibleApp.Medium" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">18dp</item>
+    </style>
+
+    <style name="ShapeAppearance.BibleApp.Large" parent="ShapeAppearance.MaterialComponents.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">24dp</item>
     </style>
 </resources>

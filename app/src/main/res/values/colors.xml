@@ -1,39 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- 語意化配色（淺色）：同名色值在 values-night/colors.xml 另有深色版本，
-         畫面一律引用這些語意色名稱，不要在版面裡寫死色碼 -->
-    <color name="background_primary">#FFFFFF</color>
-    <color name="background_surface">#F5F5F5</color>
-    <color name="background_header">#E0E0E0</color>
-    <color name="text_primary">#1A1A1A</color>
-    <color name="text_secondary">#666666</color>
-    <color name="text_tertiary">#555555</color>
-    <color name="divider">#DDDDDD</color>
-    <color name="highlight_verse">#FFF59D</color>
-    <!-- 點選整節的選取底色：跟搜尋跳轉的黃色高亮刻意用不同色相，兩種狀態不會混淆 -->
-    <color name="selected_verse">#D6E7F7</color>
+         畫面一律引用這些語意色名稱，不要在版面裡寫死色碼。
+
+         整體走溫暖、克制的紙感調性：背景是帶杏色的暖白而不是純白，
+         文字是柔和的深灰棕而不是純黑，降低長時間閱讀的刺眼感。
+         色名與結構完全沿用舊版，只調整數值，引用端不需要改。 -->
+
+    <!-- 暖白紙感背景。純白 #FFFFFF 在長文閱讀下偏冷偏刺眼，
+         降一點明度並偏黃綠一絲，接近實體書的紙色 -->
+    <color name="background_primary">#FAF9F5</color>
+    <color name="background_surface">#F0EEE6</color>
+    <color name="background_header">#E9E6DA</color>
+
+    <!-- 文字避開純黑：#3D3D3A 對暖白底仍有 10.03:1 的對比（AAA），
+         但少了純黑那種銳利的邊緣感 -->
+    <color name="text_primary">#3D3D3A</color>
+    <color name="text_secondary">#6B6B63</color>
+    <color name="text_tertiary">#5C5C55</color>
+    <color name="divider">#E3DFD3</color>
+
+    <!-- 搜尋跳轉的暫時高亮：從螢光黃改成柔和的米黃，跟暖白底同一個色族 -->
+    <color name="highlight_verse">#F5E7C0</color>
+    <!-- 點選整節的選取底色：刻意保留低飽和的冷灰藍，
+         才跟上面的暖黃高亮是兩種一眼可分的狀態 -->
+    <color name="selected_verse">#DDE6EC</color>
+
     <!-- 節號的強調色：跟關鍵字標註的紅／藍／綠區隔開，避免搜尋結果畫面混淆 -->
-    <color name="verse_number">#B45309</color>
+    <color name="verse_number">#A85C32</color>
 
     <!-- 主題強調色（翻頁 FAB、對話框按鈕文字、單選／開關的勾選狀態都吃這組）。
-         刻意跟節號同一個琥珀色系，讓整個 App 只有一種強調色，不再出現樣板的紫／青。
-         on_accent 是壓在強調色上的前景色：淺色模式強調色偏深，用白字（對比 5.05:1）；
-         深色模式強調色偏亮，改用近黑字（對比 9.36:1），兩者都通過 WCAG AA -->
-    <color name="accent">#B45309</color>
-    <color name="accent_variant">#8A3F07</color>
+         從原本高飽和的 #B45309 收斂成赤陶色，沉穩不搶眼，但對暖白底仍有 4.70:1。
+         on_accent 是壓在強調色上的前景色：白字對比 4.96:1，通過 WCAG AA -->
+    <color name="accent">#A85C32</color>
+    <color name="accent_variant">#8A4726</color>
     <color name="on_accent">#FFFFFF</color>
     <!-- 強調色的淡底：網格多選時「已勾選」格子的底色。
          配上 accent 的文字，對比 4.62:1，通過 WCAG AA -->
-    <color name="accent_container">#FFF3E4</color>
+    <color name="accent_container">#FDF6EC</color>
+
+    <!-- 多關鍵字標註色（紅／藍／綠）：飽和度一併調低，跟整體的克制調性一致，
+         淺色底下對比 4.65:1 以上 -->
+    <color name="keyword1">#B0463C</color>
+    <color name="keyword2">#3C6489</color>
+    <color name="keyword3">#4A7C4E</color>
 
     <!-- 護眼模式的暖色濾鏡：疊在閱讀畫面最上層的半透明橘。
-         ARGB 的 0x26 = 15% 不透明度——夠暖到明顯降低藍光，又不會把經文洗掉
-         （實測淺色底下文字對比仍有 14:1、深色底下 11.8:1）。
+         ARGB 的 0x26 = 15% 不透明度——夠暖到明顯降低藍光，又不會把經文洗掉。
          這是「濾鏡」不是「配色」，深淺兩種模式疊同一層即可，不需要 values-night 版本 -->
     <color name="night_reading_filter">#26FF8A3D</color>
-
-    <!-- 多關鍵字標註色（紅／藍／綠），淺色背景下的可讀版本 -->
-    <color name="keyword1">#D32F2F</color>
-    <color name="keyword2">#1565C0</color>
-    <color name="keyword3">#2E7D32</color>
 </resources>

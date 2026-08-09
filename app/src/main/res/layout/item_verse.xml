@@ -9,10 +9,10 @@
     android:layout_height="wrap_content"
     android:background="@color/background_primary"
     android:foreground="?attr/selectableItemBackground"
-    android:paddingStart="20dp"
-    android:paddingEnd="20dp"
-    android:paddingTop="9dp"
-    android:paddingBottom="9dp">
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="14dp">
 
     <!-- 經文主體（版本由介面語言決定，見 VerseReaderActivity.primaryVersionCode）。
          節號以上標小字的形式接在本文前面（樣式由 VerseAdapter 用 Span 套用），
@@ -20,6 +20,7 @@
          文字本身不可選取（textIsSelectable 預設 false），點擊一律交給外層整列處理 -->
     <TextView
         android:id="@+id/textPrimary"
+        android:fontFamily="@font/noto_serif_tc_family"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/text_primary"
@@ -44,6 +45,7 @@
 
         <TextView
             android:id="@+id/textSecondary"
+            android:fontFamily="@font/noto_serif_tc_family"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -60,6 +62,7 @@
          刻意不併進經文的 Spannable，複製這節時才不會把頁碼一起帶走 -->
     <TextView
         android:id="@+id/textPageNo"
+        android:fontFamily="@font/noto_serif_tc_family"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"

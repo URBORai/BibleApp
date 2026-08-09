@@ -8,9 +8,9 @@
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground"
     android:gravity="center_vertical"
-    android:minHeight="48dp"
-    android:paddingStart="12dp"
-    android:paddingEnd="12dp">
+    android:minHeight="54dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
 
     <TextView
         android:id="@+id/textHistoryKeywords"

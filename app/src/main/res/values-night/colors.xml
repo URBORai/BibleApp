@@ -1,29 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- 語意化配色（深色）：色名需與 values/colors.xml 完全對應，
-         系統會依目前 day/night 狀態自動選用正確版本 -->
-    <color name="background_primary">#121212</color>
-    <color name="background_surface">#1E1E1E</color>
-    <color name="background_header">#2A2A2A</color>
-    <color name="text_primary">#F0F0F0</color>
-    <color name="text_secondary">#B0B0B0</color>
-    <color name="text_tertiary">#A0A0A0</color>
-    <color name="divider">#383838</color>
-    <color name="highlight_verse">#7A5C00</color>
-    <!-- 選取底色的深色版：亮度壓低但仍明顯高於背景，經文文字維持可讀 -->
-    <color name="selected_verse">#274257</color>
+         系統會依目前 day/night 狀態自動選用正確版本。
+
+         深色版同樣走暖調：底色是帶褐的深灰而不是純黑或冷灰，
+         跟淺色版的暖白紙感是同一套溫度，只是明暗相反。 -->
+
+    <!-- 暖深灰褐。純黑 #000000 與冷灰 #121212 在暖色系裡都會顯得生硬 -->
+    <color name="background_primary">#262624</color>
+    <color name="background_surface">#302F2C</color>
+    <color name="background_header">#3A3936</color>
+
+    <!-- 文字同樣避開純白，用帶米色的淺灰，對深底有 12.72:1 的對比 -->
+    <color name="text_primary">#EDEBE5</color>
+    <color name="text_secondary">#ABA79B</color>
+    <color name="text_tertiary">#9C988D</color>
+    <color name="divider">#403E39</color>
+
+    <!-- 高亮與選取底色：跟淺色版同樣維持「暖黃 vs 冷灰藍」的區分 -->
+    <color name="highlight_verse">#5C4A28</color>
+    <color name="selected_verse">#323B40</color>
+
     <!-- 節號強調色：深色底下改用亮版，維持可辨識度 -->
-    <color name="verse_number">#F0B357</color>
+    <color name="verse_number">#E3A76F</color>
 
-    <!-- 主題強調色的深色版：底色變暗，強調色改用亮琥珀，壓在上面的前景色跟著翻成近黑 -->
-    <color name="accent">#F0B357</color>
-    <color name="accent_variant">#D9973B</color>
-    <color name="on_accent">#1A1A1A</color>
-    <!-- 已勾選格子的深色底，配上亮琥珀文字對比 7.34:1 -->
-    <color name="accent_container">#3A2C15</color>
+    <!-- 主題強調色的深色版：底色變暗，強調色改用柔和的亮赤陶，
+         對深底有 7.21:1；壓在強調色上的前景色跟著翻成暖近黑，對比 6.86:1 -->
+    <color name="accent">#E3A76F</color>
+    <color name="accent_variant">#C98F55</color>
+    <color name="on_accent">#262624</color>
+    <!-- 已勾選格子的深色底，配上亮赤陶文字對比 6.04:1 -->
+    <color name="accent_container">#3A3128</color>
 
-    <!-- 深色背景下提高亮度以維持可辨識度 -->
-    <color name="keyword1">#FF6B6B</color>
-    <color name="keyword2">#64B5F6</color>
-    <color name="keyword3">#81C784</color>
+    <!-- 深色背景下提高亮度以維持可辨識度，飽和度同樣收斂，對比 6.10:1 以上 -->
+    <color name="keyword1">#E88B84</color>
+    <color name="keyword2">#7FB3DC</color>
+    <color name="keyword3">#8FC493</color>
 </resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 搜尋結果每一筆的卡片底：淺淺一層 surface 色 + 一道細邊框做出層次，
+     刻意不用陰影——長清單裡每一筆都投影會顯得沉重，而且捲動時的重繪成本高。
+     邊框比陰影克制，也更符合整體「安靜」的調性 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <solid android:color="@color/background_surface" />
+    <stroke
+        android:width="1dp"
+        android:color="@color/divider" />
+    <corners android:radius="16dp" />
+
+</shape>

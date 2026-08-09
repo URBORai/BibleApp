@@ -9,10 +9,20 @@
         <item name="colorSecondary">@color/accent</item>
         <item name="colorSecondaryVariant">@color/accent_variant</item>
         <item name="colorOnSecondary">@color/on_accent</item>
+
+        <item name="android:colorBackground">@color/background_primary</item>
+        <item name="colorSurface">@color/background_surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.BibleApp.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.BibleApp.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.BibleApp.Large</item>
+        <item name="android:dialogCornerRadius" tools:targetApi="28">20dp</item>
+
         <!-- Edge-to-edge：系統列透明，深色底下狀態列圖示維持淺色（windowLightStatusBar=false） -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
-        <!-- Customize your theme here. -->
     </style>
 </resources>

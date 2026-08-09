@@ -15,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.UWelBAlRai.bibleapp.data.ParallelVerse
 import com.UWelBAlRai.bibleapp.databinding.ItemVerseBinding
@@ -91,10 +92,14 @@ class VerseAdapter(
             holder.binding.textSecondary.textSize =
                 (textSizeSp * SECONDARY_TEXT_RATIO).coerceAtLeast(MIN_SECONDARY_TEXT_SIZE_SP)
             // 斜體只適合拉丁字母：中文介面下對照是英文（斜體沒問題），
-            // 英文介面下對照變成中文，中文沒有真正的斜體字面，強制傾斜會變形，改回正體
+            // 英文介面下對照變成中文，中文沒有真正的斜體字面，強制傾斜會變形，改回正體。
+            //
+            // 一定要以 serifTypeface 為基底再套字形，不能用 setTypeface(null, style)：
+            // 傳 null 等於把字族重設回系統預設，版面裡設好的 Noto Serif 會被整個丟掉
+            // （實測英文對照會變成無襯線斜體，跟中文主體對不起來）
             val secondaryIsChinese = context.resources.getBoolean(R.bool.ui_prefers_english)
-            holder.binding.textSecondary.setTypeface(
-                null,
+            holder.binding.textSecondary.typeface = Typeface.create(
+                serifTypeface(context),
                 if (secondaryIsChinese) Typeface.NORMAL else Typeface.ITALIC
             )
         } else {
@@ -131,6 +136,14 @@ class VerseAdapter(
     }
 
     override fun getItemCount(): Int = verses.size
+
+    // 經文字族只解析一次就快取：onBindViewHolder 會被頻繁呼叫，
+    // 每次都去 resources 取字型是不必要的開銷
+    private var cachedSerif: Typeface? = null
+
+    private fun serifTypeface(context: Context): Typeface? =
+        cachedSerif ?: ResourcesCompat.getFont(context, R.font.noto_serif_tc_family)
+            ?.also { cachedSerif = it }
 
     // 點擊選取：點已選取的那節等於取消，點別節則自動把前一節的選取收掉（一次只能選一節）
     private fun selectVerse(position: Int) {
