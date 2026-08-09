@@ -10,6 +10,7 @@
     <string name="action_search">Search</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_done">Done</string>
+    <string name="action_confirm">OK</string>
     <string name="action_copy_verse">Copy verse</string>
     <string name="cd_copy_verse">Copy this verse</string>
 
@@ -17,8 +18,8 @@
     <!-- Short labels: the full names overflow the toolbar. Full names live in cd_* for TalkBack. -->
     <string name="old_testament">Old</string>
     <string name="new_testament">New</string>
-    <string name="cd_old_testament">Old Testament</string>
-    <string name="cd_new_testament">New Testament</string>
+    <string name="old_testament_full">Old Testament</string>
+    <string name="new_testament_full">New Testament</string>
     <string name="chapter_picker">Chapter</string>
     <!-- In the English UI the reading text is NKJV, so the parallel version is Chinese. -->
     <string name="toggle_parallel_show">Show Chinese</string>
@@ -45,6 +46,8 @@
     <string name="theme_dark">Dark</string>
     <string name="appearance_language_section">Display language</string>
     <string name="language_system">Follow system</string>
+    <string name="night_reading_mode">Night reading</string>
+    <string name="night_reading_mode_hint">Overlays a warm filter on the reader to cut blue light; works alongside dark mode.</string>
     <string name="show_page_number">Show page numbers</string>
     <string name="show_page_number_hint">Shows the printed page number at the bottom right of each verse (Chinese Union Version only).</string>
 
@@ -61,5 +64,16 @@
     <string name="search_version_english">English (NKJV)</string>
     <string name="search_no_result">No matching verses found</string>
     <string name="search_result_location">Chapter %1$d, verse %2$d</string>
+    <string name="search_scope_button">Scope: %1$s</string>
+    <string name="search_scope_title">Search scope</string>
+    <string name="search_scope_all">All</string>
+    <string name="search_scope_custom">Custom range</string>
+    <string name="search_scope_custom_title">Select books to search</string>
+    <plurals name="search_scope_custom_count">
+        <item quantity="one">%1$d book</item>
+        <item quantity="other">%1$d books</item>
+    </plurals>
+    <string name="search_history_title">Recent searches</string>
+    <string name="search_history_clear">Clear</string>
 
 </resources>

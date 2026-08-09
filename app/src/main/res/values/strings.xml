@@ -10,6 +10,7 @@
     <string name="action_search">搜尋</string>
     <string name="action_cancel">取消</string>
     <string name="action_done">完成</string>
+    <string name="action_confirm">確定</string>
     <string name="action_copy_verse">複製這節</string>
     <string name="cd_copy_verse">複製這節經文</string>
 
@@ -17,8 +18,8 @@
     <!-- 工具列按鈕標籤要短，才不會把這排擠爆；完整名稱放在 cd_* 給 TalkBack 唸 -->
     <string name="old_testament">舊約</string>
     <string name="new_testament">新約</string>
-    <string name="cd_old_testament">舊約</string>
-    <string name="cd_new_testament">新約</string>
+    <string name="old_testament_full">舊約</string>
+    <string name="new_testament_full">新約</string>
     <string name="chapter_picker">章</string>
     <!-- 對照按鈕：文案講的是「對照版本」那一邊。中文介面下對照是英文，
          英文介面（values-en）下對照變成中文，兩邊各自寫死自己的語境即可 -->
@@ -46,6 +47,8 @@
     <string name="theme_dark">深色</string>
     <string name="appearance_language_section">顯示語言</string>
     <string name="language_system">跟隨系統</string>
+    <string name="night_reading_mode">護眼模式</string>
+    <string name="night_reading_mode_hint">在閱讀畫面疊一層暖色濾鏡降低藍光，可與深色模式同時使用</string>
     <string name="show_page_number">顯示頁碼</string>
     <string name="show_page_number_hint">在每節右下角標示紙本頁碼（僅中文和合本有此資料）</string>
 
@@ -67,6 +70,22 @@
     <string name="search_version_english">英文</string>
     <string name="search_no_result">查無符合的經文</string>
     <string name="search_result_location">第%1$d章 第%2$d節</string>
+    <string name="search_scope_button">範圍：%1$s</string>
+    <string name="search_scope_title">搜尋範圍</string>
+    <string name="search_scope_all">全部</string>
+    <string name="search_scope_custom">自訂範圍</string>
+    <string name="search_scope_custom_title">選擇要搜尋的書卷</string>
+    <plurals name="search_scope_custom_count">
+        <item quantity="other">%1$d 卷已選</item>
+    </plurals>
+    <string name="search_history_title">最近搜尋</string>
+    <string name="search_history_clear">清除</string>
+
+    <!-- 搜尋歷史那一列的小標籤，都是版本代碼與運算子，兩種語言相同，不需翻譯 -->
+    <string name="search_history_separator" translatable="false">" · "</string>
+    <string name="search_history_meta" translatable="false">%1$s · %2$s</string>
+    <string name="search_history_and" translatable="false">AND</string>
+    <string name="search_history_or" translatable="false">OR</string>
 
     <!-- 純圖示／符號按鈕，兩種語言相同，不需翻譯 -->
     <string name="icon_search" translatable="false">🔍</string>

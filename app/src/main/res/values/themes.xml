@@ -3,14 +3,15 @@
     <!-- 用 NoActionBar：畫面自己有標題列/按鈕列，系統原生 ActionBar 沒有必要，
          留著反而在 AppCompatActivity 下疊出多一條列、擠壓版面 -->
     <style name="Theme.BibleApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorOnSecondary">@color/black</item>
+        <!-- 強調色：primary 與 secondary 用同一組琥珀色，整個 App 只有一種強調色。
+             色值定義在 colors.xml（values-night 另有深色版），這裡不寫死色碼。
+             翻頁 FAB 吃 colorSecondary／colorOnSecondary，對話框按鈕文字吃 colorPrimary -->
+        <item name="colorPrimary">@color/accent</item>
+        <item name="colorPrimaryVariant">@color/accent_variant</item>
+        <item name="colorOnPrimary">@color/on_accent</item>
+        <item name="colorSecondary">@color/accent</item>
+        <item name="colorSecondaryVariant">@color/accent_variant</item>
+        <item name="colorOnSecondary">@color/on_accent</item>
         <!-- Edge-to-edge：系統列透明，畫面內容自己用 WindowInsetsUtil 補 padding，
              搭配 windowLightStatusBar 讓狀態列圖示在淺色底下維持深色可辨識 -->
         <item name="android:statusBarColor">@android:color/transparent</item>

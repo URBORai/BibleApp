@@ -53,7 +53,7 @@
                 android:paddingEnd="12dp"
                 android:textAllCaps="false"
                 android:textColor="@color/text_primary"
-                android:contentDescription="@string/cd_old_testament"
+                android:contentDescription="@string/old_testament_full"
                 android:text="@string/old_testament" />
 
             <Button
@@ -66,7 +66,7 @@
                 android:paddingEnd="12dp"
                 android:textAllCaps="false"
                 android:textColor="@color/text_primary"
-                android:contentDescription="@string/cd_new_testament"
+                android:contentDescription="@string/new_testament_full"
                 android:text="@string/new_testament" />
 
             <Button

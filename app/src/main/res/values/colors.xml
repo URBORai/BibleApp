@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-
     <!-- 語意化配色（淺色）：同名色值在 values-night/colors.xml 另有深色版本，
          畫面一律引用這些語意色名稱，不要在版面裡寫死色碼 -->
     <color name="background_primary">#FFFFFF</color>
@@ -22,6 +14,23 @@
     <color name="selected_verse">#D6E7F7</color>
     <!-- 節號的強調色：跟關鍵字標註的紅／藍／綠區隔開，避免搜尋結果畫面混淆 -->
     <color name="verse_number">#B45309</color>
+
+    <!-- 主題強調色（翻頁 FAB、對話框按鈕文字、單選／開關的勾選狀態都吃這組）。
+         刻意跟節號同一個琥珀色系，讓整個 App 只有一種強調色，不再出現樣板的紫／青。
+         on_accent 是壓在強調色上的前景色：淺色模式強調色偏深，用白字（對比 5.05:1）；
+         深色模式強調色偏亮，改用近黑字（對比 9.36:1），兩者都通過 WCAG AA -->
+    <color name="accent">#B45309</color>
+    <color name="accent_variant">#8A3F07</color>
+    <color name="on_accent">#FFFFFF</color>
+    <!-- 強調色的淡底：網格多選時「已勾選」格子的底色。
+         配上 accent 的文字，對比 4.62:1，通過 WCAG AA -->
+    <color name="accent_container">#FFF3E4</color>
+
+    <!-- 護眼模式的暖色濾鏡：疊在閱讀畫面最上層的半透明橘。
+         ARGB 的 0x26 = 15% 不透明度——夠暖到明顯降低藍光，又不會把經文洗掉
+         （實測淺色底下文字對比仍有 14:1、深色底下 11.8:1）。
+         這是「濾鏡」不是「配色」，深淺兩種模式疊同一層即可，不需要 values-night 版本 -->
+    <color name="night_reading_filter">#26FF8A3D</color>
 
     <!-- 多關鍵字標註色（紅／藍／綠），淺色背景下的可讀版本 -->
     <color name="keyword1">#D32F2F</color>

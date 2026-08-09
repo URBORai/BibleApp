@@ -15,7 +15,6 @@ import androidx.core.os.LocaleListCompat
  * Configuration，也不用自己 recreate()。
  */
 object LocalePrefs {
-    private const val PREFS_NAME = "bible_app_prefs"
     private const val KEY_UI_LANGUAGE = "ui_language"
 
     /** 不覆蓋，交給系統語言決定要用 values 還是 values-en */
@@ -24,12 +23,11 @@ object LocalePrefs {
     const val LANG_ENGLISH = "en"
 
     fun getSavedLanguage(context: Context): String {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        return prefs.getString(KEY_UI_LANGUAGE, MODE_SYSTEM) ?: MODE_SYSTEM
+        return AppPrefs.of(context).getString(KEY_UI_LANGUAGE, MODE_SYSTEM) ?: MODE_SYSTEM
     }
 
     fun saveLanguage(context: Context, language: String) {
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        AppPrefs.of(context)
             .edit()
             .putString(KEY_UI_LANGUAGE, language)
             .apply()

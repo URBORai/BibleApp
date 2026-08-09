@@ -15,6 +15,13 @@
     <!-- 節號強調色：深色底下改用亮版，維持可辨識度 -->
     <color name="verse_number">#F0B357</color>
 
+    <!-- 主題強調色的深色版：底色變暗，強調色改用亮琥珀，壓在上面的前景色跟著翻成近黑 -->
+    <color name="accent">#F0B357</color>
+    <color name="accent_variant">#D9973B</color>
+    <color name="on_accent">#1A1A1A</color>
+    <!-- 已勾選格子的深色底，配上亮琥珀文字對比 7.34:1 -->
+    <color name="accent_container">#3A2C15</color>
+
     <!-- 深色背景下提高亮度以維持可辨識度 -->
     <color name="keyword1">#FF6B6B</color>
     <color name="keyword2">#64B5F6</color>

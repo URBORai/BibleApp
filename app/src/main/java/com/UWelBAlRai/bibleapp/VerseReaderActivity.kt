@@ -11,8 +11,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,10 +24,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 // App 啟動首頁：沒有上次閱讀記錄時預設載入創世記第 1 章
-class VerseReaderActivity : AppCompatActivity() {
+class VerseReaderActivity : BaseActivity() {
 
     companion object {
-        private const val PREFS_NAME = "bible_app_prefs"
         private const val KEY_LAST_READ_BOOK = "last_read_book"
         private const val KEY_LAST_READ_CHAPTER = "last_read_chapter"
         private const val KEY_FONT_SIZE = "verse_font_size"
@@ -63,8 +60,6 @@ class VerseReaderActivity : AppCompatActivity() {
         private const val STATE_CHAPTER = "state_chapter"
         private const val STATE_SHOW_PARALLEL = "state_show_parallel"
 
-        // 舊約 39 卷排在 book_order 排序後的最前面，其餘為新約，用清單位置判斷，不依賴 order_index 的實際數值
-        private const val OLD_TESTAMENT_BOOK_COUNT = 39
     }
 
     private lateinit var binding: ActivityVerseReaderBinding
@@ -103,10 +98,7 @@ class VerseReaderActivity : AppCompatActivity() {
         binding = ActivityVerseReaderBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowInsetsUtil.applySystemBarPadding(binding.root)
-
-        prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        prefs = AppPrefs.of(this)
 
         binding.recyclerVerses.layoutManager = LinearLayoutManager(this)
         adapter = VerseAdapter()
@@ -400,11 +392,10 @@ class VerseReaderActivity : AppCompatActivity() {
     private fun showBookPicker(isOldTestament: Boolean) {
         lifecycleScope.launch {
             val books = books()
-            // book_order 已依 order_index 排序，前 39 筆固定是舊約，其餘是新約
             val filtered = if (isOldTestament) {
-                books.take(OLD_TESTAMENT_BOOK_COUNT)
+                Testament.oldTestament(books)
             } else {
-                books.drop(OLD_TESTAMENT_BOOK_COUNT)
+                Testament.newTestament(books)
             }
 
             GridPicker.show(
@@ -461,6 +452,7 @@ class VerseReaderActivity : AppCompatActivity() {
         dialogBinding.groupLanguage.check(checkedLanguageId)
 
         dialogBinding.switchPageNumber.isChecked = adapter.showPageNumber
+        dialogBinding.switchNightReading.isChecked = NightReadingPrefs.isEnabled(this)
 
         val dialog = AlertDialog.Builder(this)
             .setTitle(R.string.appearance_settings)
@@ -495,6 +487,13 @@ class VerseReaderActivity : AppCompatActivity() {
         dialogBinding.switchPageNumber.setOnCheckedChangeListener { _, isChecked ->
             adapter.showPageNumber = isChecked
             prefs.edit().putBoolean(KEY_SHOW_PAGE_NUMBER, isChecked).apply()
+        }
+        // 濾鏡即時套用，對話框不用關掉就看得到效果，方便使用者當場判斷要不要開
+        dialogBinding.switchNightReading.setOnCheckedChangeListener { _, isChecked ->
+            NightReadingPrefs.setEnabled(this, isChecked)
+            // 這個畫面就在眼前，直接套用讓使用者當場看到效果；
+            // 其他畫面回到前景時會由 BaseActivity.onResume 自己補上
+            applyNightReadingMode(isChecked)
         }
 
         dialog.show()

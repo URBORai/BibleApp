@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 網格選擇器的方框按鈕底：填色與外框都走語意化色資源，深色模式由 values-night 自動換版。
-     外層 ripple 讓點擊有回饋，跟工具列膠囊 (bg_toolbar_segmented) 用同一組色與框線寬度 -->
+     外層 ripple 讓點擊有回饋，跟工具列膠囊 (bg_toolbar_segmented) 用同一組色與框線寬度。
+
+     多選模式下已勾選的格子改用 state_selected：底色換成 accent_container、框線加粗成
+     2dp 的 accent。單選模式從不設定 isSelected，所以外觀跟以前完全一樣 -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="?attr/colorControlHighlight">
 
@@ -12,13 +15,29 @@
     </item>
 
     <item>
-        <shape android:shape="rectangle">
-            <solid android:color="@color/background_surface" />
-            <stroke
-                android:width="1dp"
-                android:color="@color/divider" />
-            <corners android:radius="8dp" />
-        </shape>
+        <selector>
+
+            <item android:state_selected="true">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/accent_container" />
+                    <stroke
+                        android:width="2dp"
+                        android:color="@color/accent" />
+                    <corners android:radius="8dp" />
+                </shape>
+            </item>
+
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/background_surface" />
+                    <stroke
+                        android:width="1dp"
+                        android:color="@color/divider" />
+                    <corners android:radius="8dp" />
+                </shape>
+            </item>
+
+        </selector>
     </item>
 
 </ripple>

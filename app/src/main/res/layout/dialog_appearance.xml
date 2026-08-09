@@ -107,6 +107,23 @@
             android:layout_marginBottom="8dp"
             android:background="@color/divider" />
 
+        <!-- 護眼模式跟上面的深／淺色是兩回事：這是疊一層暖色濾鏡，兩者可以同時開 -->
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switchNightReading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="44dp"
+            android:textColor="@color/text_primary"
+            android:text="@string/night_reading_mode" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:text="@string/night_reading_mode_hint" />
+
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switchPageNumber"
             android:layout_width="match_parent"

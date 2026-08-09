@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -109,11 +110,71 @@
 
         </RadioGroup>
 
+        <!-- 搜尋範圍入口。文字由程式填成「範圍：舊約」這類字樣，
+             使用者一眼就看得到目前限定了哪些書卷，不會忘記自己設定過 -->
+        <Button
+            android:id="@+id/btnSearchScope"
+            style="?attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="12dp"
+            android:textAllCaps="false"
+            tools:text="範圍：全部" />
+
         <Button
             android:id="@+id/btnSearch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/action_search" />
+
+    </LinearLayout>
+
+    <!-- 搜尋歷史：沒有紀錄時整段（標題列 + 清單）一起 gone，畫面維持原本的乾淨 -->
+    <LinearLayout
+        android:id="@+id/layoutSearchHistory"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:text="@string/search_history_title" />
+
+            <Button
+                android:id="@+id/btnClearHistory"
+                style="?attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:textAllCaps="false"
+                android:text="@string/search_history_clear" />
+
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerSearchHistory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:scrollbars="vertical" />
 
     </LinearLayout>
 

@@ -3,15 +3,13 @@ package com.UWelBAlRai.bibleapp
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.UWelBAlRai.bibleapp.data.BibleDatabase
 import com.UWelBAlRai.bibleapp.databinding.ActivitySearchResultBinding
 import kotlinx.coroutines.launch
 
-class SearchResultActivity : AppCompatActivity() {
+class SearchResultActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,14 +17,14 @@ class SearchResultActivity : AppCompatActivity() {
         val binding = ActivitySearchResultBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowInsetsUtil.applySystemBarPadding(binding.root)
-
         // 保留原始 3 個欄位順序（含空白項目），讓 Adapter 能依欄位順序分配標註顏色
         val keywords = intent.getStringArrayListExtra("keywords") ?: return
         if (keywords.isEmpty() || keywords[0].isBlank()) return
         val useAnd = intent.getBooleanExtra("use_and", true)
         val versionCode = intent.getStringExtra("version_code") ?: "CUV"
+        // 搜尋範圍在 SearchActivity 就已經換算成書卷代碼清單，這裡照單轉給查詢即可。
+        // 範圍只決定「掃描哪些書卷」，下面依書卷分組的呈現邏輯完全不受影響
+        val bookCodes = intent.getStringArrayListExtra("book_codes")
 
         binding.recyclerSearchResults.layoutManager = LinearLayoutManager(this)
 
@@ -35,7 +33,13 @@ class SearchResultActivity : AppCompatActivity() {
         lifecycleScope.launch {
             // getAllBooks() 已依 order_index 排序，直接照順序分組即可
             val books = db.bibleDao().getAllBooks()
-            val results = db.bibleDao().searchTextMulti(versionCode, keywords, useAnd)
+            // 沒帶範圍進來（理論上不會發生）就退回全部書卷，維持原本的行為
+            val results = db.bibleDao().searchTextMulti(
+                versionCode = versionCode,
+                keywords = keywords,
+                useAnd = useAnd,
+                bookCodes = bookCodes ?: books.map { it.bookCode }
+            )
 
             binding.textEmpty.visibility = if (results.isEmpty()) View.VISIBLE else View.GONE
 

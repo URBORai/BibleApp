@@ -58,13 +58,22 @@ interface BibleDao {
 
     // 多關鍵字組合查詢（最多 3 個）：useAnd = true 用 AND 組合，false 用 OR 組合
     // 空白的第 2、3 關鍵字會被忽略，不參與條件判斷
-    suspend fun searchTextMulti(versionCode: String, keywords: List<String>, useAnd: Boolean): List<Verse> {
+    //
+    // bookCodes 是搜尋範圍（要掃描哪些書卷）。全部／舊約／新約／自訂在呼叫端就已經
+    // 被 SearchScope.resolve() 攤平成一份代碼清單，這裡不必分四種情況。
+    // 空清單代表沒有任何書卷可查，直接回空結果——也順便避開 SQL 的 IN () 空清單問題
+    suspend fun searchTextMulti(
+        versionCode: String,
+        keywords: List<String>,
+        useAnd: Boolean,
+        bookCodes: List<String>
+    ): List<Verse> {
         val trimmed = keywords.map { it.trim() }.filter { it.isNotEmpty() }.take(3)
-        if (trimmed.isEmpty()) return emptyList()
+        if (trimmed.isEmpty() || bookCodes.isEmpty()) return emptyList()
         val kw1 = trimmed.getOrElse(0) { "" }
         val kw2 = trimmed.getOrElse(1) { "" }
         val kw3 = trimmed.getOrElse(2) { "" }
-        return searchTextMultiInternal(versionCode, kw1, kw2, kw3, useAnd)
+        return searchTextMultiInternal(versionCode, kw1, kw2, kw3, useAnd, bookCodes)
     }
 
     // searchTextMulti 的實際查詢：
@@ -74,6 +83,7 @@ interface BibleDao {
         SELECT v.* FROM verse v
         JOIN bible_version bv ON v.version_id = bv.id
         WHERE bv.code = :versionCode
+            AND v.book IN (:bookCodes)
             AND (
                 (:useAnd = 1
                     AND v.text LIKE '%' || :kw1 || '%'
@@ -96,7 +106,8 @@ interface BibleDao {
         kw1: String,
         kw2: String,
         kw3: String,
-        useAnd: Boolean
+        useAnd: Boolean,
+        bookCodes: List<String>
     ): List<Verse>
 
     // 書卷清單（給導覽選單用）

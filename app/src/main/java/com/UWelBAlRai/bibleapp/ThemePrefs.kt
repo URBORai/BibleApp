@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatDelegate
 
 // 深色模式選項的儲存與套用邏輯，VerseReaderActivity 的設定入口跟 BibleApplication 啟動時都會用到
 object ThemePrefs {
-    private const val PREFS_NAME = "bible_app_prefs"
     private const val KEY_THEME_MODE = "theme_mode"
 
     const val MODE_SYSTEM = "system"
@@ -13,12 +12,11 @@ object ThemePrefs {
     const val MODE_DARK = "dark"
 
     fun getSavedMode(context: Context): String {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        return prefs.getString(KEY_THEME_MODE, MODE_SYSTEM) ?: MODE_SYSTEM
+        return AppPrefs.of(context).getString(KEY_THEME_MODE, MODE_SYSTEM) ?: MODE_SYSTEM
     }
 
     fun saveMode(context: Context, mode: String) {
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        AppPrefs.of(context)
             .edit()
             .putString(KEY_THEME_MODE, mode)
             .apply()

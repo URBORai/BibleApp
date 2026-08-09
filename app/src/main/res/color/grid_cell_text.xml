@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 網格格子的文字色：已勾選時換成強調色，跟 bg_grid_cell 的 state_selected 成對。
+     除了底色與框線，文字也一起變色，才不會只靠單一線索表示選取狀態 -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true" android:color="@color/accent" />
+    <item android:color="@color/text_primary" />
+</selector>
