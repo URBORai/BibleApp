@@ -97,7 +97,7 @@ class VerseAdapter(
             // 一定要以 serifTypeface 為基底再套字形，不能用 setTypeface(null, style)：
             // 傳 null 等於把字族重設回系統預設，版面裡設好的 Noto Serif 會被整個丟掉
             // （實測英文對照會變成無襯線斜體，跟中文主體對不起來）
-            val secondaryIsChinese = context.resources.getBoolean(R.bool.ui_prefers_english)
+            val secondaryIsChinese = secondaryIsChinese(context)
             holder.binding.textSecondary.typeface = Typeface.create(
                 serifTypeface(context),
                 if (secondaryIsChinese) Typeface.NORMAL else Typeface.ITALIC
@@ -136,6 +136,15 @@ class VerseAdapter(
     }
 
     override fun getItemCount(): Int = verses.size
+
+    // 介面語言決定對照文字要不要用斜體。跟字族一樣只讀一次就快取——
+    // 語言變更會重建 Activity 並產生新的 Adapter，所以快取不會過期
+    private var cachedSecondaryIsChinese: Boolean? = null
+
+    private fun secondaryIsChinese(context: Context): Boolean =
+        cachedSecondaryIsChinese
+            ?: context.resources.getBoolean(R.bool.ui_prefers_english)
+                .also { cachedSecondaryIsChinese = it }
 
     // 經文字族只解析一次就快取：onBindViewHolder 會被頻繁呼叫，
     // 每次都去 resources 取字型是不必要的開銷

@@ -21,8 +21,12 @@ android {
 
     buildTypes {
         release {
+            // 開啟 R8 的程式碼縮減與混淆。keep 規則放在 src/main/keepRules/，
+            // AGP 會把該目錄下所有規則檔合併後交給 R8。
+            // 資源縮減沒有開：這個專案的資源本來就沒有未使用項目（lint UnusedResources = 0），
+            // 開了只是多一層誤刪風險，沒有相對應的收益
             optimization {
-                enable = false
+                enable = true
             }
         }
     }

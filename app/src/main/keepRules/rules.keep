@@ -4,9 +4,41 @@
 # For more details, see
 #   https://d.android.com/r/tools/r8/keep-rules
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# 目前只開 minify（縮減／混淆程式碼），沒有開資源縮減，
+# 所以資源檔一律保留，不需要任何 keep 資源的規則。
+#
+# 大原則：這個 App 沒有任何反射、getIdentifier()、或用字串組類別名稱的地方，
+# 所以絕大多數類別讓 R8 自由處理就好。下面只列真的需要保護的東西。
+
+# ── Room ────────────────────────────────────────────────────────────────
+# Room 會用 Class.forName 找編譯期產生的 *_Impl（例如 BibleDatabase_Impl），
+# 類名被混淆掉就會在 Room.databaseBuilder().build() 當場丟例外。
+# room-runtime 本身有帶 consumer 規則，這裡再明確寫一次當保險，
+# 免得日後升版或設定變動時默默失效。
+-keep class * extends androidx.room.RoomDatabase { <init>(); }
+-keep class **_Impl { *; }
+
+# Entity 的欄位名稱會被 Room 產生的程式碼直接存取。理論上 R8 會一致地改名，
+# 但 data 套件很小、保留成本極低，不值得為了幾 KB 冒這個險。
+-keep class com.UWelBAlRai.bibleapp.data.** { *; }
+
+# Room 在 runtime 會讀到的註解
+-keepattributes *Annotation*
+
+# ── ViewBinding ─────────────────────────────────────────────────────────
+# 產生的 Binding 類別是在 Kotlin 程式碼直接引用（不走反射），R8 本來就不會刪，
+# 但 inflate()/bind() 是靜態方法，明確保留可避免優化改動簽章
+-keep class com.UWelBAlRai.bibleapp.databinding.** { *; }
+
+# ── 版面 XML 直接引用的自訂 View ──────────────────────────────────────────
+# XML 裡以完整類名指定的 View 由 LayoutInflater 反射建立，必須保留建構子。
+# 目前沒有自訂 View（VerseTextView 已移除），這條是給日後新增時的保護網。
+-keepclasseswithmembers class * extends android.view.View {
+    public <init>(android.content.Context, android.util.AttributeSet);
+    public <init>(android.content.Context, android.util.AttributeSet, int);
+}
+
+# ── 除錯用 ──────────────────────────────────────────────────────────────
+# 保留行號，crash log 搭配 mapping.txt 仍可還原堆疊
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile

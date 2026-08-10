@@ -66,12 +66,17 @@ class SearchResultAdapter(
 
     override fun getItemCount(): Int = items.size
 
-    // 關鍵字 1、2、3 依序對應紅、藍、綠（色值定義在 colors.xml，深色模式下會自動換成亮版）
-    private fun keywordColors(view: View) = listOf(
-        ContextCompat.getColor(view.context, R.color.keyword1),
-        ContextCompat.getColor(view.context, R.color.keyword2),
-        ContextCompat.getColor(view.context, R.color.keyword3)
-    )
+    // 關鍵字 1、2、3 依序對應紅、藍、綠（色值定義在 colors.xml，深色模式下會自動換成亮版）。
+    // 解析一次就快取：搜尋結果動輒上千列，每列都重新配一個 List 又查三次資源純粹是浪費。
+    // 色值只會因為深淺色切換而改變，那會重建 Activity 與 Adapter，所以快取不會過期
+    private var cachedKeywordColors: IntArray? = null
+
+    private fun keywordColors(view: View): IntArray =
+        cachedKeywordColors ?: intArrayOf(
+            ContextCompat.getColor(view.context, R.color.keyword1),
+            ContextCompat.getColor(view.context, R.color.keyword2),
+            ContextCompat.getColor(view.context, R.color.keyword3)
+        ).also { cachedKeywordColors = it }
 
     // 不分大小寫比對出現位置，但標註範圍取自原文字串，維持原本大小寫顯示
     // 多個關鍵字重疊時，以先出現（index 較小）的關鍵字顏色為主，後面的直接略過該段落
