@@ -11,6 +11,7 @@
     <string name="action_cancel">取消</string>
     <string name="action_done">完成</string>
     <string name="action_confirm">確定</string>
+    <string name="action_home">返回首頁</string>
     <string name="action_copy_verse">複製這節</string>
     <string name="cd_copy_verse">複製這節經文</string>
 
@@ -51,6 +52,8 @@
     <string name="night_reading_mode_hint">在閱讀畫面疊一層暖色濾鏡降低藍光，可與深色模式同時使用</string>
     <string name="show_page_number">顯示頁碼</string>
     <string name="show_page_number_hint">在每節右下角標示紙本頁碼（僅中文和合本有此資料）</string>
+    <string name="show_home_button">顯示返回首頁按鈕</string>
+    <string name="show_home_button_hint">在搜尋畫面顯示捷徑，一鍵回到剛才讀到的章節</string>
 
     <!-- 語言名稱一律以該語言自己的寫法呈現，兩種介面語言下都一樣，不翻譯 -->
     <string name="language_chinese" translatable="false">中文</string>

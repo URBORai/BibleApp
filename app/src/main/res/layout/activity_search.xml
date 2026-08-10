@@ -6,17 +6,37 @@
     android:layout_height="match_parent"
     android:background="@color/background_primary">
 
-    <TextView
+    <!-- 標題列：標題靠左，「返回首頁」靠右。
+         按鈕是介面文字不是經文，所以維持系統無襯線字體，跟其他按鈕一致 -->
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:paddingStart="20dp"
-        android:paddingEnd="20dp"
+        android:paddingEnd="8dp"
         android:paddingTop="20dp"
-        android:paddingBottom="12dp"
-        android:text="@string/search_title"
-        android:textColor="@color/text_primary"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:paddingBottom="12dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/search_title"
+            android:textColor="@color/text_primary"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnHome"
+            style="?attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:textAllCaps="false"
+            android:text="@string/action_home" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:orientation="vertical"

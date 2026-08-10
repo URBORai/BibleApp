@@ -11,6 +11,7 @@
     <string name="action_cancel">Cancel</string>
     <string name="action_done">Done</string>
     <string name="action_confirm">OK</string>
+    <string name="action_home">Home</string>
     <string name="action_copy_verse">Copy verse</string>
     <string name="cd_copy_verse">Copy this verse</string>
 
@@ -50,6 +51,8 @@
     <string name="night_reading_mode_hint">Overlays a warm filter on the reader to cut blue light; works alongside dark mode.</string>
     <string name="show_page_number">Show page numbers</string>
     <string name="show_page_number_hint">Shows the printed page number at the bottom right of each verse (Chinese Union Version only).</string>
+    <string name="show_home_button">Show Home button</string>
+    <string name="show_home_button_hint">Adds a shortcut on the search screens back to the chapter you were reading.</string>
 
     <!-- Search screen. search_version_* selects which Bible version to search (CUV / NKJV);
          it is a separate concern from the display language above. -->

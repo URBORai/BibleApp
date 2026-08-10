@@ -1,22 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- 結果清單原本是滿版的 FrameLayout，這裡包一層垂直 LinearLayout 加上頂部的
+     「返回首頁」列。清單與空狀態提示仍留在同一個 FrameLayout 裡疊著，
+     所以「查無經文」的置中位置不受影響 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_primary">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerSearchResults"
+    <!-- 按鈕靠右，跟搜尋畫面的標題列同一個位置，兩個畫面的返回入口不會跑來跑去 -->
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <TextView
-        android:id="@+id/textEmpty"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/search_no_result"
-        android:textColor="@color/text_secondary"
-        android:textSize="16sp"
-        android:visibility="gone" />
+        android:gravity="center_vertical|end"
+        android:paddingStart="20dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="8dp">
 
-</FrameLayout>
+        <Button
+            android:id="@+id/btnHome"
+            style="?attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:textAllCaps="false"
+            android:text="@string/action_home" />
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerSearchResults"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="12dp" />
+
+        <TextView
+            android:id="@+id/textEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/search_no_result"
+            android:textColor="@color/text_secondary"
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+</LinearLayout>

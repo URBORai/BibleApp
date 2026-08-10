@@ -11,11 +11,18 @@ import kotlinx.coroutines.launch
 
 class SearchResultActivity : BaseActivity() {
 
+    // 提升成欄位：onResume 要用它更新「返回首頁」按鈕的顯示狀態
+    private lateinit var binding: ActivitySearchResultBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val binding = ActivitySearchResultBinding.inflate(layoutInflater)
+        binding = ActivitySearchResultBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // 先接好返回首頁：下面幾行在參數不全時會提前 return，
+        // 那種情況畫面上更需要有路可以回去
+        binding.btnHome.setOnClickListener { goToReaderHome() }
 
         // 保留原始 3 個欄位順序（含空白項目），讓 Adapter 能依欄位順序分配標註顏色
         val keywords = intent.getStringArrayListExtra("keywords") ?: return
@@ -67,5 +74,13 @@ class SearchResultActivity : BaseActivity() {
                 startActivity(intent)
             }
         }
+    }
+
+    // 每次回到前景重讀偏好：使用者可能在閱讀畫面的外觀設定裡改過開關，
+    // 這個畫面當時在背景收不到通知，回來時補套一次
+    override fun onResume() {
+        super.onResume()
+        binding.btnHome.visibility =
+            if (HomeButtonPrefs.isEnabled(this)) View.VISIBLE else View.GONE
     }
 }

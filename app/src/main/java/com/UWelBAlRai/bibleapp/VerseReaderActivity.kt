@@ -453,6 +453,7 @@ class VerseReaderActivity : BaseActivity() {
 
         dialogBinding.switchPageNumber.isChecked = adapter.showPageNumber
         dialogBinding.switchNightReading.isChecked = NightReadingPrefs.isEnabled(this)
+        dialogBinding.switchHomeButton.isChecked = HomeButtonPrefs.isEnabled(this)
 
         val dialog = AlertDialog.Builder(this)
             .setTitle(R.string.appearance_settings)
@@ -489,6 +490,11 @@ class VerseReaderActivity : BaseActivity() {
             prefs.edit().putBoolean(KEY_SHOW_PAGE_NUMBER, isChecked).apply()
         }
         // 濾鏡即時套用，對話框不用關掉就看得到效果，方便使用者當場判斷要不要開
+        // 這個開關影響的是搜尋畫面而不是眼前這個畫面，所以只負責存起來；
+        // 兩個搜尋畫面各自在 onResume 重讀，下次進去（或從背景回到前景）就是新狀態
+        dialogBinding.switchHomeButton.setOnCheckedChangeListener { _, isChecked ->
+            HomeButtonPrefs.setEnabled(this, isChecked)
+        }
         dialogBinding.switchNightReading.setOnCheckedChangeListener { _, isChecked ->
             NightReadingPrefs.setEnabled(this, isChecked)
             // 這個畫面就在眼前，直接套用讓使用者當場看到效果；

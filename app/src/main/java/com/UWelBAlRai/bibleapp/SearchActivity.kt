@@ -88,6 +88,8 @@ class SearchActivity : BaseActivity() {
 
         setupHistory()
         setupSearchScope()
+
+        binding.btnHome.setOnClickListener { goToReaderHome() }
     }
 
     // ── 搜尋範圍 ──────────────────────────────────────────────────────────
@@ -182,6 +184,10 @@ class SearchActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         refreshHistory()
+        // 順便重讀「返回首頁」開關：使用者可能在閱讀畫面的外觀設定裡改過，
+        // 這個畫面當時在背景收不到通知，回到前景時補套一次
+        binding.btnHome.visibility =
+            if (HomeButtonPrefs.isEnabled(this)) View.VISIBLE else View.GONE
     }
 
     private fun setupHistory() {
