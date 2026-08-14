@@ -25,11 +25,61 @@
         tools:text="舊約" />
 
     <!-- 高度用 wrap_content：格子少時對話框跟著縮小，格子多（詩篇 150 章）時
-         由 AlertDialog 的最大高度收邊，超出部分靠 RecyclerView 自己捲動 -->
+         由 AlertDialog 的最大高度收邊，超出部分靠 RecyclerView 自己捲動。
+
+         weight=1 是給下面翻頁列留位子用的，不能拿掉：LinearLayout 依序量測子項，
+         沒有 weight 的話格子多到塞不下時 RecyclerView 會把對話框的高度吃光，
+         排在它後面的翻頁列就被擠到可視範圍外（看起來像沒顯示，其實是被裁掉）。
+         配上 wrap_content，空間夠時 weight 不會撐大它（對話框仍跟著格子數縮小），
+         空間不夠時才把不足的部分從 RecyclerView 身上扣，翻頁列一定留得住 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerGrid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:scrollbars="vertical" />
+
+    <!-- 翻頁列。預設 gone：沒開分頁、或全部項目一頁就裝得下時完全不占空間，
+         對話框外觀跟以前一模一樣，只有真的分成多頁才由 GridPicker 打開。
+         放在 RecyclerView 之後（畫面下緣）而不是標題下方，翻頁鍵才落在拇指構得到的位置 -->
+    <LinearLayout
+        android:id="@+id/groupGridPaging"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonGridPreviousPage"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:text="@string/grid_page_previous" />
+
+        <!-- 頁碼吃掉中間所有剩餘寬度，兩顆按鈕就穩定貼在左右兩端，
+             不會因為「第 1/3 頁」跟「第 10/12 頁」字寬不同而左右晃動 -->
+        <TextView
+            android:id="@+id/textGridPageIndicator"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            tools:text="第 1 / 3 頁" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonGridNextPage"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:text="@string/grid_page_next" />
+
+    </LinearLayout>
 
 </LinearLayout>

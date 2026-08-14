@@ -53,6 +53,15 @@
     <string name="show_page_number_hint">Shows the printed page number at the bottom right of each verse (Chinese Union Version only).</string>
     <string name="show_home_button">Show Home button</string>
     <string name="show_home_button_hint">Adds a shortcut on the search screens back to the chapter you were reading.</string>
+    <string name="appearance_chapter_paging_section">Chapter picker</string>
+    <string name="chapter_paging">Limit chapters per page</string>
+    <string name="chapter_paging_hint">Splits long books (Psalms has 150 chapters) into pages so you flip instead of scrolling. Does not affect the book picker.</string>
+    <string name="chapter_paging_size_label">Chapters per page</string>
+
+    <!-- Grid picker paging bar -->
+    <string name="grid_page_previous">Previous</string>
+    <string name="grid_page_next">Next</string>
+    <string name="grid_page_indicator">Page %1$d of %2$d</string>
 
     <!-- Search screen. search_version_* selects which Bible version to search (CUV / NKJV);
          it is a separate concern from the display language above. -->

@@ -54,6 +54,15 @@
     <string name="show_page_number_hint">在每節右下角標示紙本頁碼（僅中文和合本有此資料）</string>
     <string name="show_home_button">顯示返回首頁按鈕</string>
     <string name="show_home_button_hint">在搜尋畫面顯示捷徑，一鍵回到剛才讀到的章節</string>
+    <string name="appearance_chapter_paging_section">章節選擇</string>
+    <string name="chapter_paging">限制每頁章節數</string>
+    <string name="chapter_paging_hint">章數多的書卷（如詩篇 150 章）分成多頁，用翻頁取代一直往下滑。不影響書卷選擇</string>
+    <string name="chapter_paging_size_label">每頁章節數</string>
+
+    <!-- 網格選擇器的翻頁列 -->
+    <string name="grid_page_previous">上一頁</string>
+    <string name="grid_page_next">下一頁</string>
+    <string name="grid_page_indicator">第 %1$d / %2$d 頁</string>
 
     <!-- 語言名稱一律以該語言自己的寫法呈現，兩種介面語言下都一樣，不翻譯 -->
     <string name="language_chinese" translatable="false">中文</string>
@@ -89,6 +98,12 @@
     <string name="search_history_meta" translatable="false">%1$s · %2$s</string>
     <string name="search_history_and" translatable="false">AND</string>
     <string name="search_history_or" translatable="false">OR</string>
+
+    <!-- 每頁章節數的選項標籤：純數字，兩種語言相同，不需翻譯。
+         數值要跟 ChapterPagingPrefs.PAGE_SIZE_OPTIONS 對得起來 -->
+    <string name="chapter_paging_size_30" translatable="false">30</string>
+    <string name="chapter_paging_size_50" translatable="false">50</string>
+    <string name="chapter_paging_size_100" translatable="false">100</string>
 
     <!-- 純圖示／符號按鈕，兩種語言相同，不需翻譯 -->
     <string name="icon_search" translatable="false">🔍</string>

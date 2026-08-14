@@ -155,6 +155,85 @@
             android:textSize="13sp"
             android:text="@string/show_home_button_hint" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@color/divider" />
+
+        <!-- 章節分頁：只作用在章節選擇網格。書卷最多 66 卷、4 欄排下來也只有 17 列，
+             不需要翻頁，所以這一段的設定完全不碰書卷網格 -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:text="@string/appearance_chapter_paging_section" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switchChapterPaging"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="44dp"
+            android:textColor="@color/text_primary"
+            android:text="@string/chapter_paging" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:text="@string/chapter_paging_hint" />
+
+        <!-- 每頁章節數用固定選項而不是數字輸入框：對話框裡跳出數字鍵盤會蓋掉半個畫面，
+             還得處理空字串、0、999 這些沒意義的輸入。三個預設值都是 5 欄的倍數，
+             每頁都填滿整列。橫排讓這組選項只占一列高，不會把對話框撐長。
+             開關關閉時整組由 VerseReaderActivity 停用並調淡，表示它從屬於上面的開關 -->
+        <TextView
+            android:id="@+id/textChapterPageSizeLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:text="@string/chapter_paging_size_label" />
+
+        <RadioGroup
+            android:id="@+id/groupChapterPageSize"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/radioChapterPageSize30"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:textColor="@color/text_primary"
+                android:text="@string/chapter_paging_size_30" />
+
+            <RadioButton
+                android:id="@+id/radioChapterPageSize50"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:textColor="@color/text_primary"
+                android:text="@string/chapter_paging_size_50" />
+
+            <RadioButton
+                android:id="@+id/radioChapterPageSize100"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:textColor="@color/text_primary"
+                android:text="@string/chapter_paging_size_100" />
+
+        </RadioGroup>
+
     </LinearLayout>
 
 </ScrollView>

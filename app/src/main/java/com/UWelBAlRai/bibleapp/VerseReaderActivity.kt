@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.children
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -427,7 +428,10 @@ class VerseReaderActivity : BaseActivity() {
             title = book.displayName(this),
             items = chapters,
             columns = GridPicker.COLUMNS_CHAPTER,
-            label = { it.toString() }
+            label = { it.toString() },
+            // 關閉時是 null，網格就維持「一次列出全部、可捲動」的原行為。
+            // 每次開啟都重讀偏好，在外觀設定改完不必重啟就生效
+            pageSize = ChapterPagingPrefs.pageSizeOrNull(this)
         ) { chapter ->
             loadChapter(book.bookCode, chapter)
         }
@@ -454,6 +458,14 @@ class VerseReaderActivity : BaseActivity() {
         dialogBinding.switchPageNumber.isChecked = adapter.showPageNumber
         dialogBinding.switchNightReading.isChecked = NightReadingPrefs.isEnabled(this)
         dialogBinding.switchHomeButton.isChecked = HomeButtonPrefs.isEnabled(this)
+
+        // 章節分頁：開關關著時每頁數量仍照著上次選的顯示（只是停用），
+        // 使用者重新打開開關就知道會回到哪個設定，不必再選一次
+        dialogBinding.switchChapterPaging.isChecked = ChapterPagingPrefs.isEnabled(this)
+        dialogBinding.groupChapterPageSize.check(
+            pageSizeRadioId(ChapterPagingPrefs.getPageSize(this))
+        )
+        setChapterPageSizeEnabled(dialogBinding, ChapterPagingPrefs.isEnabled(this))
 
         val dialog = AlertDialog.Builder(this)
             .setTitle(R.string.appearance_settings)
@@ -501,7 +513,46 @@ class VerseReaderActivity : BaseActivity() {
             // 其他畫面回到前景時會由 BaseActivity.onResume 自己補上
             applyNightReadingMode(isChecked)
         }
+        // 分頁設定影響的是「下次打開章節網格」時的樣子，這裡只負責存，
+        // showChapterPicker 每次都重讀，關掉對話框直接按「章」就看得到新設定
+        dialogBinding.switchChapterPaging.setOnCheckedChangeListener { _, isChecked ->
+            ChapterPagingPrefs.setEnabled(this, isChecked)
+            setChapterPageSizeEnabled(dialogBinding, isChecked)
+        }
+        dialogBinding.groupChapterPageSize.setOnCheckedChangeListener { _, id ->
+            ChapterPagingPrefs.setPageSize(this, pageSizeOf(id))
+        }
 
         dialog.show()
+    }
+
+    /** 每頁章節數 ←→ RadioButton 的對應，兩個方向都只寫在這裡，改選項時不會漏改一邊 */
+    private fun pageSizeRadioId(pageSize: Int): Int = when (pageSize) {
+        30 -> R.id.radioChapterPageSize30
+        100 -> R.id.radioChapterPageSize100
+        else -> R.id.radioChapterPageSize50
+    }
+
+    private fun pageSizeOf(radioId: Int): Int = when (radioId) {
+        R.id.radioChapterPageSize30 -> 30
+        R.id.radioChapterPageSize100 -> 100
+        else -> ChapterPagingPrefs.DEFAULT_PAGE_SIZE
+    }
+
+    /**
+     * 每頁數量整組跟著開關啟用／停用。
+     *
+     * 用停用＋調淡而不是 gone：隱藏會讓對話框在切換開關時整個抽動一下，
+     * 而且看不到「開起來之後可以調什麼」。調淡則是同時傳達「這組屬於上面那個開關」。
+     */
+    private fun setChapterPageSizeEnabled(
+        dialogBinding: DialogAppearanceBinding,
+        enabled: Boolean
+    ) {
+        val alpha = if (enabled) 1f else 0.4f
+        dialogBinding.textChapterPageSizeLabel.alpha = alpha
+        dialogBinding.groupChapterPageSize.alpha = alpha
+        // RadioGroup 自己的 isEnabled 不會傳給子項，要逐一設定才真的點不動
+        dialogBinding.groupChapterPageSize.children.forEach { it.isEnabled = enabled }
     }
 }
