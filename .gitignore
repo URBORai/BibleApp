@@ -14,3 +14,9 @@
 .cxx
 local.properties
 
+# 簽署金鑰與密碼，絕對不要進版控
+/biblekp
+*.jks
+*.keystore
+keystore.properties
+

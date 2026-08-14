@@ -1,6 +1,18 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
+}
+
+// 簽署設定從 keystore.properties 讀，該檔不進版控。
+// 檔案不存在時（例如別台機器或 CI 沒放金鑰）不套用 signingConfig，
+// release 仍可建置成 unsigned，不會讓整個 build 掛掉。
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use { load(it) }
+    }
 }
 
 android {
@@ -19,8 +31,22 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             // 開啟 R8 的程式碼縮減與混淆。keep 規則放在 src/main/keepRules/，
             // AGP 會把該目錄下所有規則檔合併後交給 R8。
             // 資源縮減沒有開：這個專案的資源本來就沒有未使用項目（lint UnusedResources = 0），
