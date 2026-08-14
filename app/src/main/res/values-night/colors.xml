@@ -32,6 +32,9 @@
     <!-- 已勾選格子的深色底，配上亮赤陶文字對比 6.04:1 -->
     <color name="accent_container">#3A3128</color>
 
+    <!-- 輸入錯誤提示文字的深色版：跟淺色版一樣是獨立色名，不跟 keyword1 綁在一起 -->
+    <color name="error_text">#E88B84</color>
+
     <!-- 深色背景下提高亮度以維持可辨識度，飽和度同樣收斂，對比 6.10:1 以上 -->
     <color name="keyword1">#E88B84</color>
     <color name="keyword2">#7FB3DC</color>

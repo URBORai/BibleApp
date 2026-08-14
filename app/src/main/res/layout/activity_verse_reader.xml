@@ -9,7 +9,13 @@
     <!-- 導覽工具列：膠囊容器 + 分隔線做出 segmented control 的視覺。
          按鈕內距刻意收窄（12dp），讓英文介面的 Old / New / Chapter 也能整排塞進 360dp 寬的螢幕。
          真的還是塞不下時（超大系統字級、超窄螢幕）仍可橫向捲動，
-         fadingEdge 讓超出的部分淡出，看起來是「還有內容可以捲」而不是「被切掉」 -->
+         fadingEdge 讓超出的部分淡出，看起來是「還有內容可以捲」而不是「被切掉」。
+
+         加入兩個跳轉入口後這排在英文介面已一定會超出 360dp，所以就是靠上面這個
+         捲動 + 淡出機制收尾——這也是它一開始就存在的原因，不必為了塞下去把按鈕改小。
+         排列順序照「找東西的方式由粗到細」：搜尋 → 舊約 → 新約 → 章 → 頁碼 → 編號 → 設定。
+         兩個直接輸入數字的跳轉排在選單式導覽之後、設定之前，設定維持在最右端不動，
+         使用者按齒輪的肌肉記憶（捲到底最右邊）不會被打亂 -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -80,6 +86,35 @@
                 android:textAllCaps="false"
                 android:textColor="@color/text_primary"
                 android:text="@string/chapter_picker" />
+
+            <!-- 兩個跳轉入口預設顯示，實際可見度由 VerseReaderActivity 依偏好在
+                 onCreate／onResume 設定。用 gone 而不是 invisible：關掉之後
+                 這一排要真的變短，留一塊空白等於白白占掉捲動寬度 -->
+            <Button
+                android:id="@+id/btnPageJump"
+                style="?attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:minWidth="0dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:textAllCaps="false"
+                android:textColor="@color/text_primary"
+                android:contentDescription="@string/jump_page_title"
+                android:text="@string/jump_page_button" />
+
+            <Button
+                android:id="@+id/btnBookNumberJump"
+                style="?attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:minWidth="0dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:textAllCaps="false"
+                android:textColor="@color/text_primary"
+                android:contentDescription="@string/jump_book_title"
+                android:text="@string/jump_book_button" />
 
             <Button
                 android:id="@+id/btnThemeSettings"

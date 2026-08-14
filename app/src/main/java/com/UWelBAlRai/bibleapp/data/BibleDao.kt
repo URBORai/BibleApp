@@ -122,4 +122,30 @@ interface BibleDao {
     ORDER BY v.chapter
 """)
     suspend fun getChapterList(book: String): List<Int>
+
+    // 紙本頁碼跳轉：取出這一頁的第一節，用它的 book／chapter 決定要載入哪一章。
+    // 版本固定 CUV：page_no 只有和合本有值（見 getParallelChapter 的 COALESCE 註解），
+    // 這裡查的是「紙本第幾頁」這個實體書屬性，跟介面語言無關。
+    //
+    // bookCodes 決定「在哪一半裡找」，不能省：和合本的舊約與新約各自從第 1 頁起算
+    // （創世記 1:1 與馬太福音 1:1 都印在第 1 頁），光給一個頁碼問不出唯一答案。
+    // 呼叫端用 Testament 切好再傳進來，這裡不必自己知道哪一卷屬於哪一約——
+    // 跟 searchTextMultiInternal 收 bookCodes 的理由一樣。
+    //
+    // 排序一定要 JOIN book_order 走 order_index：直接 ORDER BY v.book 會變成
+    // 'EXO' < 'GEN' 的字母序，一頁橫跨兩卷書時就會挑到正典順序在後面的那一節。
+    @Query("""
+        SELECT v.* FROM verse v
+        JOIN bible_version bv ON v.version_id = bv.id
+        JOIN book_order b ON b.book_code = v.book
+        WHERE bv.code = 'CUV' AND v.page_no = :pageNo AND v.book IN (:bookCodes)
+        ORDER BY b.order_index, v.chapter, v.verse
+        LIMIT 1
+    """)
+    suspend fun getFirstVerseOnPage(pageNo: Int, bookCodes: List<String>): Verse?
+
+    // 該半部的頁碼上限：給輸入框的說明文字與超出範圍的錯誤訊息用，
+    // 不必在程式裡寫死「舊約 1126、新約 377」這兩個數字
+    @Query("SELECT MAX(page_no) FROM verse WHERE book IN (:bookCodes)")
+    suspend fun getMaxPageNo(bookCodes: List<String>): Int?
 }

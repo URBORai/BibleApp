@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 頁碼跳轉：只有一個數字要輸入，所以就是單一欄位。
+     說明文字裡的頁碼範圍由程式在開啟時從資料庫填入，不寫死在字串資源裡 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <!-- 一定要先選舊約／新約：和合本的兩約各自從第 1 頁起算，
+         創世記 1:1 與馬太福音 1:1 都印在「第 1 頁」，只給頁碼是問不出唯一答案的。
+         預設選使用者目前正在讀的那一半，多數情況下不必動它 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp"
+        android:text="@string/jump_page_testament_note" />
+
+    <RadioGroup
+        android:id="@+id/groupPageJumpTestament"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp">
+
+        <RadioButton
+            android:id="@+id/radioPageJumpOld"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:minHeight="44dp"
+            android:textColor="@color/text_primary"
+            android:text="@string/old_testament_full" />
+
+        <RadioButton
+            android:id="@+id/radioPageJumpNew"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:minHeight="44dp"
+            android:textColor="@color/text_primary"
+            android:text="@string/new_testament_full" />
+
+    </RadioGroup>
+
+    <!-- 有效頁碼範圍隨上面選的那一約而變，由程式填入 -->
+    <TextView
+        android:id="@+id/textPageJumpHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="12dp"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp"
+        tools:text="輸入紙本頁碼（舊約為 1 到 1126），跳到該頁的第一節" />
+
+    <!-- importantForAutofill=no：這是一次性的定位輸入，不是任何值得被自動填入的
+         個人資料，讓自動填入服務跳過它才不會冒出無關的建議列 -->
+    <EditText
+        android:id="@+id/editJumpPage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:maxLength="4"
+        android:singleLine="true"
+        android:imeOptions="actionDone"
+        android:importantForAutofill="no"
+        android:textColor="@color/text_primary"
+        android:hint="@string/jump_field_page" />
+
+    <!-- 錯誤訊息列的做法與 dialog_book_jump 一致，平時 gone -->
+    <TextView
+        android:id="@+id/textJumpError"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/error_text"
+        android:textSize="13sp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:text="找不到這一頁的經文" />
+
+</LinearLayout>

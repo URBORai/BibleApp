@@ -22,6 +22,10 @@
     <string name="old_testament_full">Old Testament</string>
     <string name="new_testament_full">New Testament</string>
     <string name="chapter_picker">Chapter</string>
+    <!-- Short toolbar labels, like Old / New / Chapter above. The full wording lives in
+         jump_*_title, which doubles as the button contentDescription and the dialog title. -->
+    <string name="jump_page_button">Page</string>
+    <string name="jump_book_button">Ref</string>
     <!-- In the English UI the reading text is NKJV, so the parallel version is Chinese. -->
     <string name="toggle_parallel_show">Show Chinese</string>
     <string name="toggle_parallel_hide">Hide Chinese</string>
@@ -39,13 +43,42 @@
     <string name="copied_verse">Verse copied</string>
     <string name="clipboard_label">Bible verse</string>
 
+    <!-- Jump dialogs. Every out-of-range message states the valid range: "invalid input"
+         alone would leave the user guessing. -->
+    <string name="jump_page_title">Jump to page</string>
+    <string name="jump_page_testament_note">The Chinese Union Version numbers the Old and New Testaments from page 1 separately, so pick which half first.</string>
+    <string name="jump_page_hint">Enter a printed page number (%1$s runs 1 to %2$d) to jump to its first verse.</string>
+    <string name="jump_field_page">Page</string>
+    <string name="jump_error_page_empty">Enter a page number.</string>
+    <string name="jump_error_page_range">Page out of range — %1$s runs 1 to %2$d.</string>
+    <string name="jump_error_page_missing">No verse on page %2$d of the %1$s.</string>
+
+    <string name="jump_book_title">Jump by book number</string>
+    <string name="jump_book_hint">Book numbers follow canonical order, 1 to %1$d (1 = Genesis, 2 = Exodus). Leave the verse blank to jump to the start of the chapter.</string>
+    <string name="jump_field_book">Book</string>
+    <string name="jump_field_chapter">Chapter</string>
+    <string name="jump_field_verse">Verse (opt.)</string>
+    <string name="jump_error_book">Enter a book number between 1 and %1$d.</string>
+    <!-- Plural, not a plain string: Obadiah, Philemon, Jude and 2-3 John have exactly
+         one chapter, and "has only 1 chapters" would be wrong for all of them. -->
+    <plurals name="jump_error_chapter">
+        <item quantity="one">%1$s has %2$d chapter — enter 1.</item>
+        <item quantity="other">%1$s has %2$d chapters — enter 1 to %2$d.</item>
+    </plurals>
+    <string name="jump_error_chapter_missing">%1$s has no chapter %2$d.</string>
+    <string name="jump_error_verse">%1$s %2$d has no verse %3$d.</string>
+
     <!-- Appearance dialog -->
     <string name="appearance_settings">Appearance</string>
+    <!-- The four section headings -->
+    <string name="appearance_section_display">Appearance</string>
+    <string name="appearance_section_reading">Reading</string>
+    <string name="appearance_section_navigation">Navigation</string>
+    <string name="appearance_language_section">Display language</string>
     <string name="appearance_theme_section">Theme</string>
     <string name="theme_system">Follow system</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
-    <string name="appearance_language_section">Display language</string>
     <string name="language_system">Follow system</string>
     <string name="night_reading_mode">Night reading</string>
     <string name="night_reading_mode_hint">Overlays a warm filter on the reader to cut blue light; works alongside dark mode.</string>
@@ -53,6 +86,10 @@
     <string name="show_page_number_hint">Shows the printed page number at the bottom right of each verse (Chinese Union Version only).</string>
     <string name="show_home_button">Show Home button</string>
     <string name="show_home_button_hint">Adds a shortcut on the search screens back to the chapter you were reading.</string>
+    <string name="show_page_jump">Show page jump</string>
+    <string name="show_page_jump_hint">Adds a reader toolbar entry for jumping straight to a printed page number.</string>
+    <string name="show_book_number_jump">Show book-number jump</string>
+    <string name="show_book_number_jump_hint">Adds a reader toolbar entry for jumping straight to a book number, chapter and verse.</string>
     <string name="appearance_chapter_paging_section">Chapter picker</string>
     <string name="chapter_paging">Limit chapters per page</string>
     <string name="chapter_paging_hint">Splits long books (Psalms has 150 chapters) into pages so you flip instead of scrolling. Does not affect the book picker.</string>

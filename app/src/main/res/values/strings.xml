@@ -22,6 +22,10 @@
     <string name="old_testament_full">舊約</string>
     <string name="new_testament_full">新約</string>
     <string name="chapter_picker">章</string>
+    <!-- 兩個跳轉入口的工具列標籤：跟「舊約／新約／章」一樣壓到兩個字，
+         完整說法放在 jump_*_title，同時當按鈕的 contentDescription 與對話框標題 -->
+    <string name="jump_page_button">頁碼</string>
+    <string name="jump_book_button">編號</string>
     <!-- 對照按鈕：文案講的是「對照版本」那一邊。中文介面下對照是英文，
          英文介面（values-en）下對照變成中文，兩邊各自寫死自己的語境即可 -->
     <string name="toggle_parallel_show">顯示英文對照</string>
@@ -40,13 +44,44 @@
     <string name="copied_verse">已複製這節經文</string>
     <string name="clipboard_label">經文</string>
 
+    <!-- 跳轉對話框。
+         jump_error_* 的邊界訊息一律把「有效範圍是多少」講出來，
+         只說「輸入錯誤」等於要使用者自己猜 -->
+    <string name="jump_page_title">頁碼跳轉</string>
+    <string name="jump_page_testament_note">和合本的舊約與新約各自從第 1 頁起算，請先選要跳到哪一半</string>
+    <!-- %1$s 後面不留空白：代入的是「舊約」「新約」這種中文詞，
+         中文詞與後面的字之間不該有空格（英文版另有自己的寫法） -->
+    <string name="jump_page_hint">輸入紙本頁碼（%1$s為 1 到 %2$d），跳到該頁的第一節</string>
+    <string name="jump_field_page">頁碼</string>
+    <string name="jump_error_page_empty">請輸入頁碼</string>
+    <string name="jump_error_page_range">頁碼超出範圍，%1$s是 1 到 %2$d</string>
+    <string name="jump_error_page_missing">%1$s第 %2$d 頁沒有對應的經文</string>
+
+    <string name="jump_book_title">書卷編號跳轉</string>
+    <string name="jump_book_hint">書卷編號為正典順序 1 到 %1$d（1 = 創世記、2 = 出埃及記）。節可留空，只跳到該章開頭</string>
+    <string name="jump_field_book">書卷</string>
+    <string name="jump_field_chapter">章</string>
+    <string name="jump_field_verse">節（可留空）</string>
+    <string name="jump_error_book">請輸入 1 到 %1$d 之間的書卷編號</string>
+    <!-- 中文沒有單複數變化，只需要 other；用 plurals 是為了英文版
+         （俄巴底亞書、腓利門書、猶大書、約翰二／三書都只有一章） -->
+    <plurals name="jump_error_chapter">
+        <item quantity="other">%1$s 共 %2$d 章，請輸入 1 到 %2$d</item>
+    </plurals>
+    <string name="jump_error_chapter_missing">%1$s 沒有第 %2$d 章</string>
+    <string name="jump_error_verse">%1$s 第%2$d章沒有第 %3$d 節</string>
+
     <!-- 外觀設定對話框 -->
     <string name="appearance_settings">外觀設定</string>
-    <string name="appearance_theme_section">外觀模式</string>
+    <!-- 四個分類區塊的標題 -->
+    <string name="appearance_section_display">外觀</string>
+    <string name="appearance_section_reading">閱讀</string>
+    <string name="appearance_section_navigation">導覽</string>
+    <string name="appearance_language_section">顯示語言</string>
+    <string name="appearance_theme_section">主題模式</string>
     <string name="theme_system">跟隨系統</string>
     <string name="theme_light">淺色</string>
     <string name="theme_dark">深色</string>
-    <string name="appearance_language_section">顯示語言</string>
     <string name="language_system">跟隨系統</string>
     <string name="night_reading_mode">護眼模式</string>
     <string name="night_reading_mode_hint">在閱讀畫面疊一層暖色濾鏡降低藍光，可與深色模式同時使用</string>
@@ -54,6 +89,10 @@
     <string name="show_page_number_hint">在每節右下角標示紙本頁碼（僅中文和合本有此資料）</string>
     <string name="show_home_button">顯示返回首頁按鈕</string>
     <string name="show_home_button_hint">在搜尋畫面顯示捷徑，一鍵回到剛才讀到的章節</string>
+    <string name="show_page_jump">顯示頁碼跳轉</string>
+    <string name="show_page_jump_hint">在閱讀畫面工具列顯示入口，輸入紙本頁碼直接跳過去</string>
+    <string name="show_book_number_jump">顯示書卷編號跳轉</string>
+    <string name="show_book_number_jump_hint">在閱讀畫面工具列顯示入口，用書卷編號、章、節三個數字直接跳過去</string>
     <string name="appearance_chapter_paging_section">章節選擇</string>
     <string name="chapter_paging">限制每頁章節數</string>
     <string name="chapter_paging_hint">章數多的書卷（如詩篇 150 章）分成多頁，用翻頁取代一直往下滑。不影響書卷選擇</string>

@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 齒輪（外觀設定）對話框：深淺色模式 + 介面顯示語言 + 閱讀相關的顯示開關。
-     三段用分隔線與小標題區隔；內容較高時外層 ScrollView 保證小螢幕也能捲到底 -->
+<!-- 齒輪（外觀設定）對話框。
+     設定項目累積到七、八項之後，原本「一長串開關」的排法已經看不出哪些是同一類，
+     所以改成四個分類區塊：外觀 / 閱讀 / 導覽 / 顯示語言。
+
+     分類標準是「這個設定改變的是什麼」：
+       外觀 —— 整個 App 長什麼樣（深淺色、濾鏡）
+       閱讀 —— 經文本身多出什麼資訊（頁碼標註）
+       導覽 —— 怎麼移動到別的地方（三個入口的顯示 + 章節選擇網格的分頁）
+       顯示語言 —— 介面文字用哪種語言，本來就是獨立的一件事
+
+     區塊標題用強調色 + 粗體，跟項目下方的灰色說明文字（同樣 13sp）拉開層級，
+     光靠分隔線分不出「標題」與「說明」。內容較高時外層 ScrollView 保證小螢幕也能捲到底 -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -14,11 +24,25 @@
         android:paddingTop="12dp"
         android:paddingBottom="12dp">
 
+        <!-- ── 外觀 ───────────────────────────────────────────── -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:textColor="@color/accent"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:text="@string/appearance_section_display" />
+
+        <!-- 次級標題：灰色但加粗，跟同為 13sp 灰色的說明文字區隔。
+             三層各有辨識度——區塊標題（強調色＋粗）、次級標題（灰＋粗）、說明（灰） -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/text_secondary"
             android:textSize="13sp"
+            android:textStyle="bold"
             android:text="@string/appearance_theme_section" />
 
         <RadioGroup
@@ -53,61 +77,8 @@
 
         </RadioGroup>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:background="@color/divider" />
-
-        <!-- 介面顯示語言：只換 UI 文字，不影響經文版本（那個在搜尋畫面另外選） -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp"
-            android:text="@string/appearance_language_section" />
-
-        <RadioGroup
-            android:id="@+id/groupLanguage"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <RadioButton
-                android:id="@+id/radioLanguageSystem"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="44dp"
-                android:textColor="@color/text_primary"
-                android:text="@string/language_system" />
-
-            <RadioButton
-                android:id="@+id/radioLanguageChinese"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="44dp"
-                android:textColor="@color/text_primary"
-                android:text="@string/language_chinese" />
-
-            <RadioButton
-                android:id="@+id/radioLanguageEnglish"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="44dp"
-                android:textColor="@color/text_primary"
-                android:text="@string/language_english" />
-
-        </RadioGroup>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:background="@color/divider" />
-
-        <!-- 護眼模式跟上面的深／淺色是兩回事：這是疊一層暖色濾鏡，兩者可以同時開 -->
+        <!-- 護眼模式跟上面的深／淺色是兩回事：這是疊一層暖色濾鏡，兩者可以同時開。
+             但兩者都在改「畫面看起來如何」，所以放同一個區塊 -->
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switchNightReading"
             android:layout_width="match_parent"
@@ -119,10 +90,27 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
             android:textColor="@color/text_secondary"
             android:textSize="13sp"
             android:text="@string/night_reading_mode_hint" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="@color/divider" />
+
+        <!-- ── 閱讀 ───────────────────────────────────────────── -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:textColor="@color/accent"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:text="@string/appearance_section_reading" />
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switchPageNumber"
@@ -135,10 +123,59 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
             android:textColor="@color/text_secondary"
             android:textSize="13sp"
             android:text="@string/show_page_number_hint" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="@color/divider" />
+
+        <!-- ── 導覽 ───────────────────────────────────────────── -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:textColor="@color/accent"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:text="@string/appearance_section_navigation" />
+
+        <!-- 三個「顯示某個入口」的開關排在一起：它們影響的都只是按鈕看不看得見，
+             不會關掉功能本身。頁碼／編號跳轉在閱讀畫面工具列，返回首頁在搜尋畫面 -->
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switchPageJump"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="44dp"
+            android:textColor="@color/text_primary"
+            android:text="@string/show_page_jump" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:text="@string/show_page_jump_hint" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switchBookNumberJump"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="44dp"
+            android:textColor="@color/text_primary"
+            android:text="@string/show_book_number_jump" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:text="@string/show_book_number_jump_hint" />
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switchHomeButton"
@@ -151,24 +188,21 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             android:textColor="@color/text_secondary"
             android:textSize="13sp"
             android:text="@string/show_home_button_hint" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:background="@color/divider" />
-
-        <!-- 章節分頁：只作用在章節選擇網格。書卷最多 66 卷、4 欄排下來也只有 17 列，
-             不需要翻頁，所以這一段的設定完全不碰書卷網格 -->
+        <!-- 章節分頁是導覽底下的一小組相關設定，用次級標題（灰色、不粗體）
+             跟上面三個開關分開，但不另起一個區塊——它改的仍然是「怎麼跳到別章」。
+             只作用在章節選擇網格：書卷最多 66 卷、4 欄排下來也只有 17 列，
+             不需要翻頁，所以完全不碰書卷網格 -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/text_secondary"
             android:textSize="13sp"
+            android:textStyle="bold"
             android:text="@string/appearance_chapter_paging_section" />
 
         <androidx.appcompat.widget.SwitchCompat
@@ -231,6 +265,58 @@
                 android:minHeight="44dp"
                 android:textColor="@color/text_primary"
                 android:text="@string/chapter_paging_size_100" />
+
+        </RadioGroup>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="@color/divider" />
+
+        <!-- ── 顯示語言 ────────────────────────────────────────
+             只換 UI 文字，不影響經文版本（那個在搜尋畫面另外選）。
+             排在最後：切換語言會重建 Activity，放在最上面容易被誤觸 -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:textColor="@color/accent"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:text="@string/appearance_language_section" />
+
+        <RadioGroup
+            android:id="@+id/groupLanguage"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/radioLanguageSystem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:textColor="@color/text_primary"
+                android:text="@string/language_system" />
+
+            <RadioButton
+                android:id="@+id/radioLanguageChinese"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:textColor="@color/text_primary"
+                android:text="@string/language_chinese" />
+
+            <RadioButton
+                android:id="@+id/radioLanguageEnglish"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:textColor="@color/text_primary"
+                android:text="@string/language_english" />
 
         </RadioGroup>
 

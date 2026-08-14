@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 書卷編號跳轉：書卷 / 章 / 節三個獨立的數字欄位。
+     不用「1 1 1」這種空白分隔的單一輸入框，理由有三個：
+     每一欄可以掛自己的標籤（不必先記住順序）、錯誤可以精準指到出錯的那一欄
+     （而不是整串重打）、以及數字鍵盤上本來就沒有好按的空白鍵。
+     多欄輸入的排法也跟搜尋畫面的三個關鍵字欄一致。 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <!-- 書卷總數由程式在開啟時從資料庫填入（見 jump_book_hint 的 %1$d），
+         不寫死 66：換一份 bible.db 時這裡不必跟著改 -->
+    <TextView
+        android:id="@+id/textBookJumpHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp"
+        tools:text="書卷編號為正典順序 1 到 66（1 = 創世記、2 = 出埃及記）" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false">
+
+        <!-- 三欄等寬（weight=1）：中文標籤是「書卷 / 章 / 節」，英文是
+             「Book / Chapter / Verse」，等寬分配讓兩種語言都不會有一欄被擠窄。
+             欄位本身只放得下 3 位數，寬度綽綽有餘 -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content">
+
+            <!-- labelFor 而不是在 EditText 上另外掛 contentDescription：
+                 這樣 TalkBack 唸的是版面上真的看得到的那個標籤，兩者不會各說各話 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:labelFor="@+id/editJumpBook"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:text="@string/jump_field_book" />
+
+            <!-- imeOptions=actionNext 讓數字鍵盤出現「下一個」，
+                 三欄可以一路打完不必手動點下一格。
+                 importantForAutofill=no：一次性的定位輸入，不是個人資料 -->
+            <EditText
+                android:id="@+id/editJumpBook"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLength="2"
+                android:singleLine="true"
+                android:imeOptions="actionNext"
+                android:importantForAutofill="no"
+                android:textColor="@color/text_primary"
+                tools:text="1" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:labelFor="@+id/editJumpChapter"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:text="@string/jump_field_chapter" />
+
+            <EditText
+                android:id="@+id/editJumpChapter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLength="3"
+                android:singleLine="true"
+                android:imeOptions="actionNext"
+                android:importantForAutofill="no"
+                android:textColor="@color/text_primary"
+                tools:text="1" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp">
+
+            <!-- 節可以留空（= 只跳到該章開頭），標籤直接寫明，
+                 使用者才不會以為非填不可 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:labelFor="@+id/editJumpVerse"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:text="@string/jump_field_verse" />
+
+            <EditText
+                android:id="@+id/editJumpVerse"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLength="3"
+                android:singleLine="true"
+                android:imeOptions="actionDone"
+                android:importantForAutofill="no"
+                android:textColor="@color/text_primary"
+                tools:text="1" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- 錯誤訊息用固定的一列而不是 EditText.setError() 的浮動氣泡：
+         三欄各自很窄，氣泡會蓋住旁邊兩欄，而且旋轉後就消失了。
+         平時 gone，不占高度 -->
+    <TextView
+        android:id="@+id/textJumpError"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/error_text"
+        android:textSize="13sp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:text="請輸入 1 到 66 之間的書卷編號" />
+
+</LinearLayout>

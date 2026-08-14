@@ -9,9 +9,12 @@ import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.children
+import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +23,8 @@ import com.UWelBAlRai.bibleapp.data.BookOrder
 import com.UWelBAlRai.bibleapp.data.ParallelVerse
 import com.UWelBAlRai.bibleapp.databinding.ActivityVerseReaderBinding
 import com.UWelBAlRai.bibleapp.databinding.DialogAppearanceBinding
+import com.UWelBAlRai.bibleapp.databinding.DialogBookJumpBinding
+import com.UWelBAlRai.bibleapp.databinding.DialogPageJumpBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -131,12 +136,31 @@ class VerseReaderActivity : BaseActivity() {
                 showChapterPicker(book)
             }
         }
+        binding.btnPageJump.setOnClickListener { showPageJumpDialog() }
+        binding.btnBookNumberJump.setOnClickListener { showBookNumberJumpDialog() }
         binding.btnThemeSettings.setOnClickListener { showAppearanceDialog() }
+        applyToolbarEntryVisibility()
 
         binding.fabPreviousChapter.setOnClickListener { goToAdjacentChapter(-1) }
         binding.fabNextChapter.setOnClickListener { goToAdjacentChapter(1) }
 
         restoreInitialPosition(savedInstanceState)
+    }
+
+    /**
+     * 依偏好決定兩個跳轉入口出不出現在工具列上。
+     *
+     * 用 GONE 而不是 INVISIBLE：關掉之後這排要真的變短。留一塊看不見的空白等於
+     * 白白吃掉捲動寬度，使用者關了按鈕卻發現工具列還是得捲，會覺得開關沒生效。
+     *
+     * 這兩個偏好只有本畫面的外觀對話框改得到，所以 onCreate 設一次 + 開關當下再設一次
+     * 就夠了，不必像護眼模式那樣每次 onResume 重讀。
+     */
+    private fun applyToolbarEntryVisibility() {
+        binding.btnPageJump.visibility =
+            if (PageJumpPrefs.isEnabled(this)) View.VISIBLE else View.GONE
+        binding.btnBookNumberJump.visibility =
+            if (BookNumberJumpPrefs.isEnabled(this)) View.VISIBLE else View.GONE
     }
 
     // 決定啟動要顯示哪一章，優先序刻意如此：
@@ -437,6 +461,248 @@ class VerseReaderActivity : BaseActivity() {
         }
     }
 
+    // ─────────────────────────── 直接輸入數字跳轉 ───────────────────────────
+
+    /**
+     * 兩個跳轉對話框共用的外框。
+     *
+     * 關鍵在「確定」鍵：AlertDialog 的預設行為是按下就關，但這裡要驗證通過才能關——
+     * 輸入有誤時得留在原地把問題指出來，否則使用者得把整組數字重打一次。
+     * 唯一能改掉這個預設的做法，就是等 show() 之後再覆寫按鈕自己的 OnClickListener；
+     * 在 Builder 階段掛的 listener 一定會伴隨自動關閉，改不掉。
+     *
+     * [submit] 跑在協程裡（驗證要查資料庫），回傳 true 代表跳轉成功、可以收起對話框。
+     */
+    private fun showJumpDialog(titleRes: Int, content: View, submit: suspend () -> Boolean) {
+        val dialog = AlertDialog.Builder(this)
+            .setTitle(titleRes)
+            .setView(content)
+            .setNegativeButton(R.string.action_cancel, null)
+            .setPositiveButton(R.string.action_confirm, null)
+            .create()
+        dialog.show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            lifecycleScope.launch { if (submit()) dialog.dismiss() }
+        }
+    }
+
+    /**
+     * 把錯誤顯示在對話框下緣固定的那一列，並把焦點移回出錯的欄位。
+     *
+     * 不用 EditText.setError() 的浮動氣泡：書卷／章／節三欄各自很窄，
+     * 氣泡會蓋住旁邊兩欄，而且轉個螢幕就消失了。
+     *
+     * 回傳 false 讓呼叫端可以直接 `return showJumpError(...)`，
+     * 「顯示錯誤」與「不要關對話框」永遠是同一件事，不會有人漏寫其中一半。
+     */
+    private fun showJumpError(errorView: TextView, field: View?, message: String): Boolean {
+        errorView.text = message
+        errorView.visibility = View.VISIBLE
+        field?.requestFocus()
+        return false
+    }
+
+    /**
+     * 使用者一改輸入，上一則錯誤就過期了，留著只會自相矛盾——
+     * 例如頁碼對話框已改選新約、說明也更新成「1 到 377」，
+     * 下面卻還掛著上一次的「舊約是 1 到 1126」。
+     */
+    private fun clearJumpErrorOnEdit(errorView: TextView, vararg fields: EditText) {
+        fields.forEach { field ->
+            field.doOnTextChanged { _, _, _, _ -> errorView.visibility = View.GONE }
+        }
+    }
+
+    /**
+     * 頁碼跳轉一律要先知道是哪一約：和合本的舊約與新約各自從第 1 頁起算，
+     * 「第 1 頁」同時是創世記 1:1 與馬太福音 1:1。
+     *
+     * 切分沿用 [Testament]（書卷選單與搜尋範圍也是用它），不自己再判一次哪一卷屬於哪一約。
+     */
+    private suspend fun testamentBookCodes(isOldTestament: Boolean): List<String> {
+        val allBooks = books()
+        val half = if (isOldTestament) {
+            Testament.oldTestament(allBooks)
+        } else {
+            Testament.newTestament(allBooks)
+        }
+        return half.map { it.bookCode }
+    }
+
+    private fun testamentName(isOldTestament: Boolean): String =
+        getString(if (isOldTestament) R.string.old_testament_full else R.string.new_testament_full)
+
+    // 兩約各自的頁碼上限查一次就夠：bible.db 是唯讀的參考資料，跑一次 App 之內不會變。
+    // key 是「是不是舊約」
+    private val cachedMaxPageNo = mutableMapOf<Boolean, Int>()
+
+    private suspend fun maxPageNo(isOldTestament: Boolean): Int? =
+        cachedMaxPageNo[isOldTestament]
+            ?: db.bibleDao().getMaxPageNo(testamentBookCodes(isOldTestament))
+                ?.also { cachedMaxPageNo[isOldTestament] = it }
+
+    private fun showPageJumpDialog() {
+        val dialogBinding = DialogPageJumpBinding.inflate(layoutInflater)
+        showJumpDialog(R.string.jump_page_title, dialogBinding.root) {
+            submitPageJump(dialogBinding)
+        }
+        lifecycleScope.launch {
+            // 預設選使用者現在正在讀的那一半：從詩篇按下去，想跳的多半也是舊約的頁碼，
+            // 這樣多數情況下這組選項連碰都不用碰
+            val readingOldTestament =
+                currentBookCode in testamentBookCodes(isOldTestament = true)
+            dialogBinding.groupPageJumpTestament.check(
+                if (readingOldTestament) R.id.radioPageJumpOld else R.id.radioPageJumpNew
+            )
+            updatePageJumpHint(dialogBinding)
+            // 監聽器掛在 check() 之後：先掛的話上面那行會立刻多觸發一次
+            dialogBinding.groupPageJumpTestament.setOnCheckedChangeListener { _, _ ->
+                // 換一約等於換了有效範圍，上一則錯誤立刻過期
+                dialogBinding.textJumpError.visibility = View.GONE
+                lifecycleScope.launch { updatePageJumpHint(dialogBinding) }
+            }
+        }
+        clearJumpErrorOnEdit(dialogBinding.textJumpError, dialogBinding.editJumpPage)
+    }
+
+    /**
+     * 說明文字裡的有效範圍隨選到的那一約而變，而且是問資料庫來的，
+     * 不寫死「舊約 1126、新約 377」——換一份 bible.db 時這裡不必跟著改。
+     * 查回來之前那一列先留白：先填一個假範圍再改掉，比空著更容易誤導
+     */
+    private suspend fun updatePageJumpHint(dialogBinding: DialogPageJumpBinding) {
+        val isOldTestament = dialogBinding.radioPageJumpOld.isChecked
+        val maxPage = maxPageNo(isOldTestament) ?: return
+        dialogBinding.textPageJumpHint.text =
+            getString(R.string.jump_page_hint, testamentName(isOldTestament), maxPage)
+    }
+
+    private suspend fun submitPageJump(dialogBinding: DialogPageJumpBinding): Boolean {
+        // 每次按確定都先把上一次的錯誤收掉，訊息才一定對應這一次的輸入
+        dialogBinding.textJumpError.visibility = View.GONE
+
+        val isOldTestament = dialogBinding.radioPageJumpOld.isChecked
+        val testamentName = testamentName(isOldTestament)
+        val input = dialogBinding.editJumpPage.text.toString().trim().toIntOrNull()
+        val maxPage = maxPageNo(isOldTestament)
+        if (input == null) {
+            return showJumpError(
+                dialogBinding.textJumpError,
+                dialogBinding.editJumpPage,
+                getString(R.string.jump_error_page_empty)
+            )
+        }
+        if (maxPage != null && (input < 1 || input > maxPage)) {
+            return showJumpError(
+                dialogBinding.textJumpError,
+                dialogBinding.editJumpPage,
+                getString(R.string.jump_error_page_range, testamentName, maxPage)
+            )
+        }
+
+        // 落在範圍內仍可能查無資料（實測 334、378、414… 等頁號在 CUV 裡沒有節對應），
+        // 所以查完要再判一次，不能只靠上下界擋
+        val verse = db.bibleDao()
+            .getFirstVerseOnPage(input, testamentBookCodes(isOldTestament))
+            ?: return showJumpError(
+                dialogBinding.textJumpError,
+                dialogBinding.editJumpPage,
+                getString(R.string.jump_error_page_missing, testamentName, input)
+            )
+
+        // 跳到該頁的第一節並高亮：一頁通常橫跨好幾章，不指出來使用者看不出停在哪
+        loadChapter(verse.book, verse.chapter, verse.verse)
+        return true
+    }
+
+    private fun showBookNumberJumpDialog() {
+        val dialogBinding = DialogBookJumpBinding.inflate(layoutInflater)
+        showJumpDialog(R.string.jump_book_title, dialogBinding.root) {
+            submitBookNumberJump(dialogBinding)
+        }
+        lifecycleScope.launch {
+            dialogBinding.textBookJumpHint.text =
+                getString(R.string.jump_book_hint, books().size)
+        }
+        clearJumpErrorOnEdit(
+            dialogBinding.textJumpError,
+            dialogBinding.editJumpBook,
+            dialogBinding.editJumpChapter,
+            dialogBinding.editJumpVerse
+        )
+    }
+
+    /**
+     * 書卷編號（order_index）+ 章 + 節 → 跳轉。
+     *
+     * 三段各自驗證、各自給訊息，錯在哪一欄就講哪一欄，不會只丟一句「輸入有誤」。
+     * 查詢一律沿用既有方法：order_index → book_code 由已快取的 [books] 直接對出來
+     * （不必為此多寫一支查詢），章用 getChapterList，節用 getChapter。
+     */
+    private suspend fun submitBookNumberJump(dialogBinding: DialogBookJumpBinding): Boolean {
+        dialogBinding.textJumpError.visibility = View.GONE
+        val errorView = dialogBinding.textJumpError
+
+        val allBooks = books()
+        val bookNumber = dialogBinding.editJumpBook.text.toString().trim().toIntOrNull()
+        // 空白、0、67、999 全部收斂成同一種情況：找不到這個編號的書卷
+        val book = allBooks.find { it.orderIndex == bookNumber }
+            ?: return showJumpError(
+                errorView,
+                dialogBinding.editJumpBook,
+                getString(R.string.jump_error_book, allBooks.size)
+            )
+        val bookName = book.displayName(this)
+
+        val chapters = db.bibleDao().getChapterList(book.bookCode)
+        val chapter = dialogBinding.editJumpChapter.text.toString().trim().toIntOrNull()
+        if (chapter == null || chapter < 1 || chapter > chapters.size) {
+            // 沒填、或明顯超過這卷的章數：訊息直接把「這卷有幾章」講出來
+            return showJumpError(
+                errorView,
+                dialogBinding.editJumpChapter,
+                resources.getQuantityString(
+                    R.plurals.jump_error_chapter,
+                    chapters.size,
+                    bookName,
+                    chapters.size
+                )
+            )
+        }
+        if (chapter !in chapters) {
+            // 章號不保證連號（見 currentChapters 的註解），落在總章數以內仍可能剛好缺這一章
+            return showJumpError(
+                errorView,
+                dialogBinding.editJumpChapter,
+                getString(R.string.jump_error_chapter_missing, bookName, chapter)
+            )
+        }
+
+        // 節可以留空：等於「只跳到這一章的開頭」，不捲動也不高亮
+        val verseInput = dialogBinding.editJumpVerse.text.toString().trim()
+        var targetVerse = -1
+        if (verseInput.isNotEmpty()) {
+            val verseNumber = verseInput.toIntOrNull() ?: 0
+            // 用主體版本驗證節號：畫面上列出的就是這一版的節，
+            // 兩版有版節差異的那幾處才不會發生「說有、卻捲不過去」
+            val chapterVerses =
+                db.bibleDao().getChapter(primaryVersionCode, book.bookCode, chapter)
+            if (chapterVerses.none { it.verse == verseNumber }) {
+                return showJumpError(
+                    errorView,
+                    dialogBinding.editJumpVerse,
+                    getString(R.string.jump_error_verse, bookName, chapter, verseNumber)
+                )
+            }
+            targetVerse = verseNumber
+        }
+
+        // 高亮沿用搜尋跳轉那一套：這同樣是「使用者指名要看某一節」，
+        // 一章三十幾節裡不標出來，跳完還得自己找
+        loadChapter(book.bookCode, chapter, targetVerse)
+        return true
+    }
+
     private fun showAppearanceDialog() {
         val dialogBinding = DialogAppearanceBinding.inflate(layoutInflater)
 
@@ -458,6 +724,8 @@ class VerseReaderActivity : BaseActivity() {
         dialogBinding.switchPageNumber.isChecked = adapter.showPageNumber
         dialogBinding.switchNightReading.isChecked = NightReadingPrefs.isEnabled(this)
         dialogBinding.switchHomeButton.isChecked = HomeButtonPrefs.isEnabled(this)
+        dialogBinding.switchPageJump.isChecked = PageJumpPrefs.isEnabled(this)
+        dialogBinding.switchBookNumberJump.isChecked = BookNumberJumpPrefs.isEnabled(this)
 
         // 章節分頁：開關關著時每頁數量仍照著上次選的顯示（只是停用），
         // 使用者重新打開開關就知道會回到哪個設定，不必再選一次
@@ -506,6 +774,16 @@ class VerseReaderActivity : BaseActivity() {
         // 兩個搜尋畫面各自在 onResume 重讀，下次進去（或從背景回到前景）就是新狀態
         dialogBinding.switchHomeButton.setOnCheckedChangeListener { _, isChecked ->
             HomeButtonPrefs.setEnabled(this, isChecked)
+        }
+        // 這兩個開關管的按鈕就在對話框後面那排工具列上，所以存完立刻重套一次可見度：
+        // 關掉對話框就看得到結果，不必離開畫面再回來
+        dialogBinding.switchPageJump.setOnCheckedChangeListener { _, isChecked ->
+            PageJumpPrefs.setEnabled(this, isChecked)
+            applyToolbarEntryVisibility()
+        }
+        dialogBinding.switchBookNumberJump.setOnCheckedChangeListener { _, isChecked ->
+            BookNumberJumpPrefs.setEnabled(this, isChecked)
+            applyToolbarEntryVisibility()
         }
         dialogBinding.switchNightReading.setOnCheckedChangeListener { _, isChecked ->
             NightReadingPrefs.setEnabled(this, isChecked)
